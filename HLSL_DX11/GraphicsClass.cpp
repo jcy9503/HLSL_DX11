@@ -26,7 +26,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
         return false;
     }
 
-    if(!m_Direct3D->initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR))
+    if(!m_Direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR))
     {
         MessageBox(hwnd, L"Could not initialize Direct3D.", L"Error", MB_OK);
         return false;
@@ -50,7 +50,7 @@ bool GraphicsClass::Frame()
 
 bool GraphicsClass::Render()
 {
-    m_Direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
+    m_Direct3D->BeginScene(1.0f, 1.0f, 0.0f, 1.0f);
     m_Direct3D->EndScene();
     
     return true;

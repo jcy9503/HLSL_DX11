@@ -8,20 +8,20 @@ public:
     D3DClass(const D3DClass&);
     ~D3DClass();
 
-    bool initialize(int, int, bool, HWND, bool, float, float);
+    bool Initialize(int, int, bool, HWND, bool, float, float);
     void Shutdown();
 
-    void BeginScene(float, float, float, float);
-    void EndScene();
+    void BeginScene(float, float, float, float) const;
+    void EndScene() const;
 
-    ID3D11Device* GetDevice();
-    ID3D11DeviceContext* GetDeviceContext();
+    ID3D11Device* GetDevice() const;
+    ID3D11DeviceContext* GetDeviceContext() const;
 
-    void GetProjectionmatrix(XMMATRIX&);
-    void GetWorldMatrix(XMMATRIX&);
-    void GetOrthoMatrix(XMMATRIX&);
+    void GetProjectionmatrix(XMMATRIX&) const;
+    void GetWorldMatrix(XMMATRIX&) const;
+    void GetOrthoMatrix(XMMATRIX&) const;
 
-    void GetVideoCardInfo(char*, int&);
+    void GetVideoCardInfo(char*, int&) const;
 
 private:
     bool m_vsync_enabled = false;
