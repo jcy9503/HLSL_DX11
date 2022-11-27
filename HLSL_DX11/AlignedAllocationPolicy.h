@@ -1,12 +1,12 @@
 #pragma once
 
-template<size_t Alignment>
+template<size_t T>
 class AlignedAllocationPolicy
 {
 public:
-    static void* operator new(size_t size)
+    static void* operator new(const size_t size)
     {
-        return _aligned_malloc(size, Alignment);
+        return _aligned_malloc(size, T);
     }
 
     static void operator delete(void* memory)

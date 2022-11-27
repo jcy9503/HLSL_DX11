@@ -13,23 +13,23 @@ public:
 
     bool Initialize();
     void Shutdown();
-    void Run();
+    void Run() const;
 
-    LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+    LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM) const;
 
 private:
-    bool Frame();
+    bool Frame() const;
     void InitializeWindows(int&, int&);
     void ShutdownWindows();
 
 private:
-    LPCWSTR m_applicationName;
-    HINSTANCE m_hinstance;
-    HWND m_hwnd;
+    LPCWSTR m_applicationName{};
+    HINSTANCE m_hinstance{};
+    HWND m_hwnd{};
 
     InputClass* m_input = nullptr;
     GraphicsClass* m_Graphics = nullptr;
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-static SystemClass* ApplicationHandle = 0;
+static SystemClass* ApplicationHandle = nullptr;

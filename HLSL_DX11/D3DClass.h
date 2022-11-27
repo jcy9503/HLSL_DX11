@@ -35,7 +35,8 @@ private:
     ID3D11DepthStencilState* m_depthStencilState = nullptr;
     ID3D11DepthStencilView* m_depthStencilView = nullptr;
     ID3D11RasterizerState* m_rasterState = nullptr;
-    XMMATRIX m_projectionMatrix;
+    
     XMMATRIX m_worldMatrix;
     XMMATRIX m_orthoMatrix;
+    XMMATRIX m_projectionMatrix;
 };

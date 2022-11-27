@@ -12,29 +12,27 @@ InputClass::InputClass(const InputClass&)
 }
 
 InputClass::~InputClass()
-{
-    
-}
+= default;
 
 void InputClass::Initialize()
 {
-    for(int i = 0; i < 256; ++i)
+    for (bool& m_key : m_keys)
     {
-        m_keys[i] = false;
+        m_key = false;
     }
 }
 
-void InputClass::KeyDown(unsigned int input)
+void InputClass::KeyDown(const unsigned int input)
 {
     m_keys[input] = true;
 }
 
-void InputClass::KeyUp(unsigned int input)
+void InputClass::KeyUp(const unsigned int input)
 {
     m_keys[input] = false;
 }
 
-bool InputClass::IsKeyDown(unsigned int key)
+bool InputClass::IsKeyDown(const unsigned int key) const
 {
     return m_keys[key];
 }
