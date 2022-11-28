@@ -14,3 +14,6 @@ constexpr float RADIAN = 0.0174532925f;
 #include <tchar.h>
 
 #include "DxDefine.h"
+
+char* ConvertWCtoC(const wchar_t*);
+wchar_t* ConvertCtoWC(const char*);

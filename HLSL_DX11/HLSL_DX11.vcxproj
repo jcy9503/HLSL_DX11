@@ -157,9 +157,13 @@
     <ClCompile Include="Cameraclass.cpp" />
     <ClCompile Include="Colorshaderclass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
+    <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="GraphicsClass.cpp" />
     <ClCompile Include="HLSL_DX11.cpp" />
     <ClCompile Include="InputClass.cpp" />
+    <ClCompile Include="LightClass.cpp" />
+    <ClCompile Include="LightShaderClass.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Modelclass.cpp" />
     <ClCompile Include="Stdafx.cpp" />
     <ClCompile Include="SystemClass.cpp" />
@@ -171,9 +175,12 @@
     <ClInclude Include="Cameraclass.h" />
     <ClInclude Include="Colorshaderclass.h" />
     <ClInclude Include="D3DClass.h" />
+    <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DxDefine.h" />
     <ClInclude Include="GraphicsClass.h" />
     <ClInclude Include="InputClass.h" />
+    <ClInclude Include="LightClass.h" />
+    <ClInclude Include="LightShaderClass.h" />
     <ClInclude Include="Modelclass.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="SystemClass.h" />

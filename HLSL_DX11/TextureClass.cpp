@@ -2,57 +2,46 @@
 #include "TextureClass.h"
 
 TextureClass::TextureClass()
-{
-}
+= default;
 
 TextureClass::TextureClass(const TextureClass&)
 {
 }
 
 TextureClass::~TextureClass()
-{
-}
+= default;
 
-bool TextureClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
+bool TextureClass::Initialize(ID3D11Device* device, const WCHAR* filename)
 {
     int width = 0;
     int height = 0;
 
-    if (!LoadTarga(filename, height, width)) return false;
+    // D3D11_TEXTURE2D_DESC textureDesc;
+    // textureDesc.Height = height;
+    // textureDesc.Width = width;
+    // textureDesc.MipLevels = 0;
+    // textureDesc.ArraySize = 1;
+    // textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    // textureDesc.SampleDesc.Count = 1;
+    // textureDesc.SampleDesc.Quality = 0;
+    // textureDesc.Usage = D3D11_USAGE_DEFAULT;
+    // textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+    // textureDesc.CPUAccessFlags = 0;
+    // textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-    D3D11_TEXTURE2D_DESC textureDesc;
-    textureDesc.Height = height;
-    textureDesc.Width = width;
-    textureDesc.MipLevels = 0;
-    textureDesc.ArraySize = 1;
-    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    textureDesc.SampleDesc.Count = 1;
-    textureDesc.SampleDesc.Quality = 0;
-    textureDesc.Usage = D3D11_USAGE_DEFAULT;
-    textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-    textureDesc.CPUAccessFlags = 0;
-    textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+    HRESULT result = CreateDDSTextureFromFile(device, filename, &m_texture, &m_textureView, static_cast<size_t>(0), nullptr);
+    if(FAILED(result)) return false;
 
-    HRESULT result = device->CreateTexture2D(&textureDesc, nullptr, &m_texture);
-    if (FAILED(result)) return false;
+    // D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    // srvDesc.Format = textureDesc.Format;
+    // srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    // srvDesc.Texture2D.MostDetailedMip = 0;
+    // srvDesc.Texture2D.MipLevels = -1;
 
-    UINT rowPitch = static_cast<UINT>(width * 4) * sizeof(unsigned char);
+    // result = device->CreateShaderResourceView(m_texture, &srvDesc, &m_textureView);
+    // if (FAILED(result)) return false;
 
-    deviceContext->UpdateSubresource(m_texture, 0, nullptr, m_targaData, rowPitch, 0);
-
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    srvDesc.Format = textureDesc.Format;
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-    srvDesc.Texture2D.MipLevels = -1;
-
-    result = device->CreateShaderResourceView(m_texture, &srvDesc, &m_textureView);
-    if (FAILED(result)) return false;
-
-    deviceContext->GenerateMips(m_textureView);
-
-    delete[] m_targaData;
-    m_targaData = nullptr;
+    // deviceContext->GenerateMips(m_textureView);
 
     return true;
 }

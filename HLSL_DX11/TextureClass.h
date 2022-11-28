@@ -17,7 +17,7 @@ public:
     TextureClass(const TextureClass&);
     ~TextureClass();
 
-    bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*);
+    bool Initialize(ID3D11Device*, const WCHAR*);
     void Shutdown();
 
     ID3D11ShaderResourceView* GetTexture() const;
@@ -27,6 +27,6 @@ private:
 
 private:
     unsigned char* m_targaData = nullptr;
-    ID3D11Texture2D* m_texture = nullptr;
+    ID3D11Resource* m_texture = nullptr;
     ID3D11ShaderResourceView* m_textureView = nullptr;
 };

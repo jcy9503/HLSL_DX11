@@ -2,10 +2,12 @@
 #include "TextureClass.h"
 #include "Modelclass.h"
 
+#include <fstream>
+
 ModelClass::ModelClass()
 = default;
 
-ModelClass::ModelClass(const ModelClass&)
+ModelClass::ModelClass(const ModelClass& other)
 {
     
 }
@@ -13,19 +15,21 @@ ModelClass::ModelClass(const ModelClass&)
 ModelClass::~ModelClass()
 = default;
 
-bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename)
+bool ModelClass::Initialize(ID3D11Device* device, const char* modelFilename, const WCHAR* textureFilename)
 {
+    if(!LoadModel(modelFilename)) return false;
     if(!InitializeBuffers(device)) return false;
 
-    return LoadTexture(device, deviceContext, textureFilename);
+    return LoadTexture(device, textureFilename);
 }
-
 
 void ModelClass::Shutdown()
 {
     ReleaseTexture();
     
     ShutdownBuffers();
+
+    ReleaseModel();
 }
 
 void ModelClass::Render(ID3D11DeviceContext* deviceContext) const
@@ -41,38 +45,24 @@ int ModelClass::GetIndexCount() const
 
 ID3D11ShaderResourceView* ModelClass::GetTexture() const
 {
-    return m_Texture->GetTexture();
+    return m_texture->GetTexture();
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
 {
-    m_vertexCount = 4;
-    m_indexCount = 6;
-
     auto vertices = new VertexType[m_vertexCount];
     if(!vertices) return false;
 
     auto indices = new unsigned long[m_indexCount];
     if(!indices) return false;
 
-    vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
-    vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
-
-    vertices[1].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
-    vertices[1].texture = XMFLOAT2(1.0f, 1.0f);
-
-    vertices[2].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);
-    vertices[2].texture = XMFLOAT2(0.0f, 0.0f);
-
-    vertices[3].position = XMFLOAT3(1.0f, 1.0f, 0.0f);
-    vertices[3].texture = XMFLOAT2(1.0f, 0.0f);
-
-    indices[0] = 0;
-    indices[1] = 2;
-    indices[2] = 1;
-    indices[3] = 1;
-    indices[4] = 2;
-    indices[5] = 3;
+    for(int i = 0; i < m_vertexCount; ++i)
+    {
+        vertices[i].position    = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
+        vertices[i].texture     = XMFLOAT2(m_model[i].tu, m_model[i].tv);
+        vertices[i].normal      = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+        indices[i] = i;
+    }
 
     D3D11_BUFFER_DESC vertexBufferDesc;
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -140,20 +130,62 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext) const
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
+bool ModelClass::LoadTexture(ID3D11Device* device, const WCHAR* filename)
 {
-    m_Texture = new TextureClass;
-    if(!m_Texture) return false;
-
-    return m_Texture->Initialize(device, deviceContext, filename);
+    m_texture = new TextureClass;
+    if(!m_texture) return false;
+    
+    return m_texture->Initialize(device, filename);
 }
 
 void ModelClass::ReleaseTexture()
 {
-    if(m_Texture)
+    if(m_texture)
     {
-        m_Texture->Shutdown();
-        delete m_Texture;
-        m_Texture = nullptr;
+        m_texture->Shutdown();
+        delete m_texture;
+        m_texture = nullptr;
+    }
+}
+
+bool ModelClass::LoadModel(const char* filename)
+{
+    std::ifstream fin;
+    fin.open(filename);
+
+    if(fin.fail()) return false;
+
+    char input = 0;
+    fin.get(input);
+    while(input != ':') fin.get(input);
+
+    fin >> m_vertexCount;
+    m_indexCount = m_vertexCount;
+
+    m_model = new ModelType[m_vertexCount];
+    if(!m_model) return false;
+
+    fin.get(input);
+    while(input != ':') fin.get(input);
+    fin.get(input); fin.get(input);
+
+    for(int i = 0; i < m_vertexCount; ++i)
+    {
+        fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
+        fin >> m_model[i].tu >> m_model[i].tv;
+        fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
+    }
+
+    fin.close();
+
+    return true;
+}
+
+void ModelClass::ReleaseModel()
+{
+    if(m_model)
+    {
+        delete[] m_model;
+        m_model = nullptr;
     }
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "TextureShaderClass.h"
 
 constexpr bool FULL_SCREEN = false;
 constexpr bool VSYNC_ENABLED = true;
@@ -9,7 +8,8 @@ constexpr float SCREEN_NEAR = 0.1f;
 class D3DClass;
 class CameraClass;
 class ModelClass;
-class ColorShaderClass;
+class LightClass;
+class LightShaderClass;
 
 class GraphicsClass
 {
@@ -23,11 +23,12 @@ public:
     bool Frame() const;
 
 private:
-    bool Render() const;
+    bool Render(float) const;
 
 private:
     D3DClass* m_direct3D = nullptr;
     CameraClass* m_camera = nullptr;
     ModelClass* m_model = nullptr;
-    TextureShaderClass* m_textureShader = nullptr;
+    LightShaderClass* m_lightShader = nullptr;
+    LightClass* m_light = nullptr;
 };
