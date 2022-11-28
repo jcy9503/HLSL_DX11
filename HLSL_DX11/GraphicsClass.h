@@ -1,4 +1,5 @@
 #pragma once
+#include "TextureShaderClass.h"
 
 constexpr bool FULL_SCREEN = false;
 constexpr bool VSYNC_ENABLED = true;
@@ -25,8 +26,8 @@ private:
     bool Render() const;
 
 private:
-    D3DClass* m_Direct3D = nullptr;
-    CameraClass* m_Camera = nullptr;
-    ModelClass* m_Model = nullptr;
-    ColorShaderClass* m_ColorShader = nullptr;
+    D3DClass* m_direct3D = nullptr;
+    CameraClass* m_camera = nullptr;
+    ModelClass* m_model = nullptr;
+    TextureShaderClass* m_textureShader = nullptr;
 };

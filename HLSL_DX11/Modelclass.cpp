@@ -1,4 +1,5 @@
 ﻿#include "Stdafx.h"
+#include "TextureClass.h"
 #include "Modelclass.h"
 
 ModelClass::ModelClass()
@@ -12,13 +13,18 @@ ModelClass::ModelClass(const ModelClass&)
 ModelClass::~ModelClass()
 = default;
 
-bool ModelClass::Initialize(ID3D11Device* device)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename)
 {
-    return InitializeBuffers(device);
+    if(!InitializeBuffers(device)) return false;
+
+    return LoadTexture(device, deviceContext, textureFilename);
 }
+
 
 void ModelClass::Shutdown()
 {
+    ReleaseTexture();
+    
     ShutdownBuffers();
 }
 
@@ -33,35 +39,40 @@ int ModelClass::GetIndexCount() const
     return m_indexCount;
 }
 
+ID3D11ShaderResourceView* ModelClass::GetTexture() const
+{
+    return m_Texture->GetTexture();
+}
+
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
 {
-    m_vertexCount = 3;
-    m_indexCount = 3;
+    m_vertexCount = 4;
+    m_indexCount = 6;
 
     auto vertices = new VertexType[m_vertexCount];
-    if(!vertices)
-    {
-        return false;
-    }
+    if(!vertices) return false;
 
     auto indices = new unsigned long[m_indexCount];
-    if(!indices)
-    {
-        return false;
-    }
+    if(!indices) return false;
 
     vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
-    vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
 
-    vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);
-    vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[1].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
+    vertices[1].texture = XMFLOAT2(1.0f, 1.0f);
 
-    vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
-    vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[2].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);
+    vertices[2].texture = XMFLOAT2(0.0f, 0.0f);
+
+    vertices[3].position = XMFLOAT3(1.0f, 1.0f, 0.0f);
+    vertices[3].texture = XMFLOAT2(1.0f, 0.0f);
 
     indices[0] = 0;
-    indices[1] = 1;
-    indices[2] = 2;
+    indices[1] = 2;
+    indices[2] = 1;
+    indices[3] = 1;
+    indices[4] = 2;
+    indices[5] = 3;
 
     D3D11_BUFFER_DESC vertexBufferDesc;
     vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -76,10 +87,8 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
     vertexData.SysMemPitch = 0;
     vertexData.SysMemSlicePitch = 0;
 
-    if(FAILED(device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer)))
-    {
-        return false;
-    }
+    HRESULT result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+    if(FAILED(result)) return false;
 
     D3D11_BUFFER_DESC indexBufferDesc;
     indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -94,10 +103,8 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
     indexData.SysMemPitch = 0;
     indexData.SysMemSlicePitch = 0;
 
-    if(FAILED(device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer)))
-    {
-        return false;
-    }
+    result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+    if(FAILED(result)) return false;
 
     delete[] vertices;
     vertices = nullptr;
@@ -125,10 +132,28 @@ void ModelClass::ShutdownBuffers()
 
 void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext) const
 {
-    constexpr unsigned int stride = sizeof(VertexType);
-    constexpr unsigned int offset = 0;
+    constexpr UINT stride = sizeof(VertexType);
+    constexpr UINT offset = 0;
 
     deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
     deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
+{
+    m_Texture = new TextureClass;
+    if(!m_Texture) return false;
+
+    return m_Texture->Initialize(device, deviceContext, filename);
+}
+
+void ModelClass::ReleaseTexture()
+{
+    if(m_Texture)
+    {
+        m_Texture->Shutdown();
+        delete m_Texture;
+        m_Texture = nullptr;
+    }
 }
