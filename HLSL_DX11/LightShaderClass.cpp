@@ -15,7 +15,7 @@ LightShaderClass::~LightShaderClass()
 
 bool LightShaderClass::Initialize(ID3D11Device* device, const HWND hwnd)
 {
-    return InitializeShader(device, hwnd, L"../HLSL_DX11/Demo06/Light.vs", L"../HLSL_DX11/Demo06/Light.ps");
+    return InitializeShader(device, hwnd, L"../HLSL_DX11/Demo09/Light.vs", L"../HLSL_DX11/Demo09/Light.ps");
 }
 
 void LightShaderClass::Shutdown()
@@ -26,10 +26,10 @@ void LightShaderClass::Shutdown()
 bool LightShaderClass::Render(ID3D11DeviceContext* deviceContext, const int indexCount, const XMMATRIX worldMatrix,
                               const XMMATRIX viewMatrix, const XMMATRIX projectionMatrix,
                               ID3D11ShaderResourceView* texture, const XMFLOAT3 lightDirection,
-                              const XMFLOAT4 diffuseColor) const
+                              const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor) const
 {
     if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection,
-                             diffuseColor))
+                             ambientColor, diffuseColor))
         return false;
 
     RenderShader(deviceContext, indexCount);
@@ -216,7 +216,7 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, const 
 bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix,
                                            XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
                                            ID3D11ShaderResourceView* texture, const XMFLOAT3 lightDirection,
-                                           const XMFLOAT4 diffuseColor) const
+                                           const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor) const
 {
     worldMatrix = XMMatrixTranspose(worldMatrix);
     viewMatrix = XMMatrixTranspose(viewMatrix);
@@ -243,6 +243,7 @@ bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, X
 
     const auto dataPtr2 = static_cast<LightBufferType*>(mappedResource.pData);
 
+    dataPtr2->ambientColor = ambientColor;
     dataPtr2->diffuseColor = diffuseColor;
     dataPtr2->lightDirection = lightDirection;
     dataPtr2->padding = 0.0f;

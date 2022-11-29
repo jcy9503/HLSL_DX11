@@ -1,3 +1,11 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: light.ps
+////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////
+// GLOBALS //
+/////////////
 Texture2D shaderTexture;
 SamplerState SampleType;
 
@@ -9,6 +17,9 @@ cbuffer LightBuffer
     float padding;
 };
 
+//////////////
+// TYPEDEFS //
+//////////////
 struct PixelInputType
 {
     float4 position : SV_POSITION;
@@ -16,6 +27,9 @@ struct PixelInputType
     float3 normal   : NORMAL;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
 float4 LightPixelShader(PixelInputType input) : SV_TARGET
 {
     float4 textureColor;
@@ -34,7 +48,7 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
     }
 
     color = saturate(color);
-    color = color * textureColor;
+    //color = color * textureColor;
 
     return color;
 }

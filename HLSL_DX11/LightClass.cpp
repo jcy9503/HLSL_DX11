@@ -16,6 +16,11 @@ LightClass::~LightClass()
     
 }
 
+void LightClass::setAmbientColor(float red, float green, float blue, float alpha)
+{
+    m_ambientColor = XMFLOAT4(red, green, blue, alpha);
+}
+
 void LightClass::SetDiffuseColor(const float red, const float green, const float blue, const float alpha)
 {
     m_diffuseColor = XMFLOAT4(red, green, blue, alpha);
@@ -24,6 +29,11 @@ void LightClass::SetDiffuseColor(const float red, const float green, const float
 void LightClass::SetDirection(const float pitch, const float yaw, const float roll)
 {
     m_direction = XMFLOAT3(pitch, yaw, roll);
+}
+
+XMFLOAT4 LightClass::GetAmbientColor() const
+{
+    return m_ambientColor;
 }
 
 XMFLOAT4 LightClass::GetDiffuseColor() const

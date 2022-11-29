@@ -52,6 +52,7 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     m_light = new LightClass;
     if (!m_light) return false;
 
+    m_light->setAmbientColor(0.15f, 0.15f, 0.0f, 1.0f);
     m_light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
     m_light->SetDirection(0.0f, 0.0f, 1.0f);
 
@@ -97,7 +98,7 @@ bool GraphicsClass::Frame() const
 {
     static float rotation = 0.0f;
 
-    rotation += static_cast<float>(XM_PI) * 0.01f;
+    rotation += static_cast<float>(XM_PI) * 0.002f;
     if (rotation > 360.0f) rotation -= 360.0f;
 
     return Render(rotation);
@@ -120,7 +121,7 @@ bool GraphicsClass::Render(const float rotation) const
 
     if (!m_lightShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix,
                                projectionMatrix, m_model->GetTexture(), m_light->GetDirection(),
-                               m_light->GetDiffuseColor()))
+                               m_light->GetAmbientColor(), m_light->GetDiffuseColor()))
         return false;
 
     m_direct3D->EndScene();

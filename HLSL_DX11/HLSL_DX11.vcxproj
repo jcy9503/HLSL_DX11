@@ -188,6 +188,23 @@
     <ClInclude Include="TextureClass.h" />
     <ClInclude Include="TextureShaderClass.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Demo04\Color.ps" />
+    <Content Include="Demo04\Color.vs" />
+    <Content Include="Demo05\sample.tga" />
+    <Content Include="Demo05\sf.ps" />
+    <Content Include="Demo05\Texture.ps" />
+    <Content Include="Demo05\Texture.vs" />
+    <Content Include="Demo06\Light.ps" />
+    <Content Include="Demo06\Light.vs" />
+    <Content Include="Demo06\sample.dds" />
+    <Content Include="Demo07\cube.txt" />
+    <Content Include="Demo07\sample.dds" />
+    <Content Include="Demo08\cube.obj" />
+    <Content Include="Demo08\model.txt" />
+    <Content Include="Demo09\Light.ps" />
+    <Content Include="Demo09\Light.vs" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
