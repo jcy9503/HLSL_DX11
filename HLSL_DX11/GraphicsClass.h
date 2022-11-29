@@ -1,4 +1,6 @@
 #pragma once
+#include "BitmapClass.h"
+#include "TextureShaderClass.h"
 
 constexpr bool FULL_SCREEN = false;
 constexpr bool VSYNC_ENABLED = true;
@@ -28,7 +30,6 @@ private:
 private:
     D3DClass* m_direct3D = nullptr;
     CameraClass* m_camera = nullptr;
-    ModelClass* m_model = nullptr;
-    LightShaderClass* m_lightShader = nullptr;
-    LightClass* m_light = nullptr;
+    TextureShaderClass* m_textureShader = nullptr;
+    BitmapClass* m_bitmap = nullptr;
 };

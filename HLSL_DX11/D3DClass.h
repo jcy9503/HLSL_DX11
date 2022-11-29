@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "DxDefine.h"
 
-class D3DClass
+class D3DClass : public AlignedAllocationPolicy<16>
 {
 public:
     D3DClass();
@@ -23,6 +23,9 @@ public:
 
     void GetVideoCardInfo(char*, int&) const;
 
+    void TurnZBufferOn() const;
+    void TurnZBufferOff() const;
+
 private:
     bool m_vsync_enabled = false;
     int m_videoCardMemory = 0;
@@ -35,6 +38,7 @@ private:
     ID3D11DepthStencilState* m_depthStencilState = nullptr;
     ID3D11DepthStencilView* m_depthStencilView = nullptr;
     ID3D11RasterizerState* m_rasterState = nullptr;
+    ID3D11DepthStencilState* m_depthDisabledStencilState = nullptr;
     
     XMMATRIX m_worldMatrix;
     XMMATRIX m_orthoMatrix;

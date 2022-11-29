@@ -15,19 +15,18 @@ typedef struct FaceType
 };
 
 void GetModelFilename(char*);
-bool ReadFileCounts(char*, int&, int&, int&, int&);
+bool ReadFileCounts(const char*, int&, int&, int&, int&);
 bool LoadDataStructures(char*, int, int, int, int);
 
 int main()
 {
-    bool result;
     char filename[256];
     int vertexCount, textureCount, normalCount, faceCount;
     char garbage;
 
     GetModelFilename(filename);
 
-    result = ReadFileCounts(filename, vertexCount, textureCount, normalCount, faceCount);
+    bool result = ReadFileCounts(filename, vertexCount, textureCount, normalCount, faceCount);
     if(!result) return -1;
 
     cout << endl;
@@ -68,7 +67,7 @@ void GetModelFilename(char* filename)
     return;
 }
 
-bool ReadFileCounts(char* filename, int& vertexCount, int& textureCount, int& normalCount, int& faceCount)
+bool ReadFileCounts(const char* filename, int& vertexCount, int& textureCount, int& normalCount, int& faceCount)
 {
     ifstream fin;
     char input;
@@ -188,7 +187,11 @@ bool LoadDataStructures(char* filename, int vertexCount, int textureCount, int n
     }
 
     fin.close();
-    fout.open("../HLSL_DX11/Demo08/model.txt");
+    
+    cout << "Enter output filename: ";
+    cin >> filename;
+    fout.open(filename);
+    if(!fout.good()) return false; 
 
     fout << "Vertex Couint: " << (faceCount * 3) << endl;
     fout << endl;
