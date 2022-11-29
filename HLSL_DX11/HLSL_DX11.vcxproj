@@ -204,6 +204,8 @@
     <Content Include="Demo08\model.txt" />
     <Content Include="Demo09\Light.ps" />
     <Content Include="Demo09\Light.vs" />
+    <Content Include="Demo10\Light.ps" />
+    <Content Include="Demo10\Light.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

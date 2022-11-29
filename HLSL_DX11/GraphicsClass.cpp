@@ -5,7 +5,6 @@
 #include "LightClass.h"
 #include "LightShaderClass.h"
 #include "GraphicsClass.h"
-
 #include "TextureShaderClass.h"
 
 GraphicsClass::GraphicsClass()
@@ -33,7 +32,7 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     m_camera->SetPosition(0.0f, 0.0f, -5.0f);
 
     m_model = new ModelClass;
-    char filePath[] = "../HLSL_DX11/Demo07/cube.txt";
+    constexpr char filePath[] = "../HLSL_DX11/Demo07/cube.txt";
     if (!m_model) return false;
     if (!m_model->Initialize(m_direct3D->GetDevice(), filePath, L"../HLSL_DX11/Demo07/sample.dds"))
     {
@@ -52,9 +51,11 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     m_light = new LightClass;
     if (!m_light) return false;
 
-    m_light->setAmbientColor(0.15f, 0.15f, 0.0f, 1.0f);
+    m_light->SetAmbientColor(0.15f, 0.15f, 0.0f, 1.0f);
     m_light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
     m_light->SetDirection(0.0f, 0.0f, 1.0f);
+    m_light->SetSpecularcolor(1.0f, 1.0f, 1.0f, 1.0f);
+    m_light->SetSpecularPower(32.0f);
 
     return true;
 }
@@ -121,7 +122,8 @@ bool GraphicsClass::Render(const float rotation) const
 
     if (!m_lightShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix,
                                projectionMatrix, m_model->GetTexture(), m_light->GetDirection(),
-                               m_light->GetAmbientColor(), m_light->GetDiffuseColor()))
+                               m_light->GetAmbientColor(), m_light->GetDiffuseColor(), m_camera->GetPosition(),
+                               m_light->GetSpecularColor(), m_light->GetSpecularPower()))
         return false;
 
     m_direct3D->EndScene();
