@@ -4,16 +4,14 @@
 #include <complex>
 
 TextureShaderClass::TextureShaderClass()
-{
-}
+= default;
 
 TextureShaderClass::TextureShaderClass(const TextureShaderClass&)
 {
 }
 
 TextureShaderClass::~TextureShaderClass()
-{
-}
+= default;
 
 bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
@@ -105,7 +103,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd,
     polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     polygonLayout[1].InstanceDataStepRate = 0;
 
-    constexpr UINT numElements = std::size(polygonLayout);
+    constexpr UINT numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
     result = device->CreateInputLayout(polygonLayout, numElements,
                                        vertexShaderBuffer->GetBufferPointer(),

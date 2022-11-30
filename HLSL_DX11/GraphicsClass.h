@@ -9,9 +9,7 @@ constexpr float SCREEN_NEAR = 0.1f;
 
 class D3DClass;
 class CameraClass;
-class ModelClass;
-class LightClass;
-class LightShaderClass;
+class TextClass;
 
 class GraphicsClass
 {
@@ -22,14 +20,11 @@ public:
 
     bool Initialize(int, int, HWND);
     void Shutdown();
-    bool Frame() const;
-
-private:
-    bool Render(float) const;
+    void Frame() const;
+    bool Render() const;
 
 private:
     D3DClass* m_direct3D = nullptr;
     CameraClass* m_camera = nullptr;
-    TextureShaderClass* m_textureShader = nullptr;
-    BitmapClass* m_bitmap = nullptr;
+    TextClass* m_text = nullptr;
 };

@@ -12,7 +12,7 @@ BitmapClass::BitmapClass(const BitmapClass&)
 BitmapClass::~BitmapClass()
 = default;
 
-bool BitmapClass::Initialize(ID3D11Device* device, const int screenWidth, int screenHeight, const WCHAR* textureFilename,
+bool BitmapClass::Initialize(ID3D11Device* device, const int screenWidth, int screenHeight, WCHAR* textureFilename,
                              const int bitmapWidth, const int bitmapHeight)
 {
     m_screenWidth = screenWidth;
@@ -183,7 +183,7 @@ void BitmapClass::RenderBuffers(ID3D11DeviceContext* deviceContext) const
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-bool BitmapClass::LoadTexture(ID3D11Device* device, const WCHAR* filename)
+bool BitmapClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
     m_texture = new TextureClass;
     if (!m_texture) return false;

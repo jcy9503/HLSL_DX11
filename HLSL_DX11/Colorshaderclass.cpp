@@ -121,7 +121,7 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd,
     polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
     polygonLayout[1].InstanceDataStepRate = 0;
 
-    constexpr unsigned int numElements = std::size(polygonLayout);
+    constexpr UINT numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
     if(FAILED(device->CreateInputLayout(polygonLayout, numElements,
         vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_layout)))

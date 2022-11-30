@@ -15,7 +15,7 @@ ModelClass::ModelClass(const ModelClass& other)
 ModelClass::~ModelClass()
 = default;
 
-bool ModelClass::Initialize(ID3D11Device* device, const char* modelFilename, const WCHAR* textureFilename)
+bool ModelClass::Initialize(ID3D11Device* device, const char* modelFilename, WCHAR* textureFilename)
 {
     if(!LoadModel(modelFilename)) return false;
     if(!InitializeBuffers(device)) return false;
@@ -130,7 +130,7 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext) const
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-bool ModelClass::LoadTexture(ID3D11Device* device, const WCHAR* filename)
+bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 {
     m_texture = new TextureClass;
     if(!m_texture) return false;

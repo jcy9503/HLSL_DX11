@@ -85,7 +85,8 @@ bool SystemClass::Frame() const
         return false;
     }
 
-    return m_Graphics->Frame();
+    m_Graphics->Frame();
+    return true;
 }
 
 LRESULT SystemClass::MessageHandler(const HWND hwnd, const UINT umsg, const WPARAM wparam, const LPARAM lparam) const
@@ -115,7 +116,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 
     m_hinstance = GetModuleHandle(nullptr);
 
-    m_applicationName = L"Dx11Demo_02";
+    m_applicationName = L"HLSL_Project";
 
     WNDCLASSEX wc;
     wc.style            = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -187,7 +188,7 @@ void SystemClass::ShutdownWindows()
     ApplicationHandle = nullptr;
 }
 
-LRESULT WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+LRESULT WndProc(const HWND hwnd, const UINT umsg, const WPARAM wparam, const LPARAM lparam)
 {
     switch(umsg)
     {

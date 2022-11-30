@@ -13,8 +13,8 @@ TextureClass::~TextureClass()
 
 bool TextureClass::Initialize(ID3D11Device* device, const WCHAR* filename)
 {
-    int width = 0;
-    int height = 0;
+    // int width = 0;
+    // int height = 0;
 
     // D3D11_TEXTURE2D_DESC textureDesc;
     // textureDesc.Height = height;
@@ -29,7 +29,7 @@ bool TextureClass::Initialize(ID3D11Device* device, const WCHAR* filename)
     // textureDesc.CPUAccessFlags = 0;
     // textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-    HRESULT result = CreateDDSTextureFromFile(device, filename, &m_texture, &m_textureView, static_cast<size_t>(0), nullptr);
+    HRESULT result = CreateDDSTextureFromFile(device, filename, nullptr, &m_textureView);
     if(FAILED(result)) return false;
 
     // D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
