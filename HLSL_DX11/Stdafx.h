@@ -12,6 +12,7 @@ constexpr float RADIAN = 0.0174532925f;
 #include <tchar.h>
 
 #include "DxDefine.h"
+#include <dinput.h>
 
 char* ConvertWCtoC(const wchar_t*);
 // ReSharper disable once CppInconsistentNaming

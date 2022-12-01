@@ -28,6 +28,8 @@ public:
 	void Shutdown();
 	bool Render(ID3D11DeviceContext*, XMMATRIX, XMMATRIX) const;
 
+	bool SetMousePosition(int, int, ID3D11DeviceContext*) const;
+
 private:
 	static bool InitializeSentence(SentenceType**, int, ID3D11Device*);
 	bool UpdateSentence(SentenceType*, const char*, int, int, float, float, float, ID3D11DeviceContext*) const;
@@ -35,8 +37,8 @@ private:
 	bool RenderSentence(ID3D11DeviceContext*, const SentenceType*, XMMATRIX, XMMATRIX) const;
 
 private:
-	FontClass* m_Font = nullptr;
-	FontShaderClass* m_FontShader = nullptr;
+	FontClass* m_font = nullptr;
+	FontShaderClass* m_fontShader = nullptr;
 	int m_screenWidth = 0;
 	int m_screenHeight = 0;
 	XMMATRIX m_baseViewMatrix;

@@ -16,6 +16,7 @@ GraphicsClass::~GraphicsClass()
 
 bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, const HWND hwnd)
 {
+    // Direct3D 객체 생성/초기화
     m_direct3D = new D3DClass;
     if (!m_direct3D) return false;
     if (!m_direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR))
@@ -24,13 +25,16 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         return false;
     }
 
+    // 카메라 객체 생성/위치 설정
     m_camera = new CameraClass;
     if (!m_camera) return false;
     m_camera->SetPosition(0.0f, 0.0f, -10.0f);
 
     XMMATRIX baseViewMatrix;
+    m_camera->Render();
     m_camera->GetViewMatrix(baseViewMatrix);
 
+    // 텍스트 객체 생성
     m_text = new TextClass;
     if(!m_text) return false;
     if(!m_text->Initialize(m_direct3D->GetDevice(), m_direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix))
@@ -140,7 +144,7 @@ void GraphicsClass::Shutdown()
     // }
 }
 
-void GraphicsClass::Frame() const
+bool GraphicsClass::Frame(int mouseX, int mouseY) const
 {
     // static float rotation = 0.0f;
     //
@@ -148,15 +152,23 @@ void GraphicsClass::Frame() const
     // if (rotation > 360.0f) rotation -= 360.0f;
     //
     // return Render(rotation);
+
+    if(!m_text->SetMousePosition(mouseX, mouseY, m_direct3D->GetDeviceContext()))
+        return false;
     m_camera->SetPosition(0.0f, 0.0f, -10.0f);
+
+    return true;
 }
 
 bool GraphicsClass::Render() const
 {
+    // Scene을 그리기 위해 Buffer 지우기
     m_direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
+    // 카메라의 위치에 따라 뷰 행렬 생성
     m_camera->Render();
 
+    // 카메라 및 D3D 객체에서 월드, 뷰, 투영 행렬 획득
     XMMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
     
     m_camera->GetViewMatrix(viewMatrix);
@@ -164,9 +176,13 @@ bool GraphicsClass::Render() const
     m_direct3D->GetProjectionmatrix(projectionMatrix);
     m_direct3D->GetOrthoMatrix(orthoMatrix);
 
+    // 2D 렌더링을 위해 Z Buffer 끄기
     m_direct3D->TurnZBufferOff();
+
+    // 텍스트 렌더링을 위해 알파 블렌딩 켜기
     m_direct3D->TurnOnAlphaBlending();
 
+    // 텍스트 문자열 렌더링
     if(!m_text->Render(m_direct3D->GetDeviceContext(), worldMatrix, orthoMatrix))
         return false;
 
@@ -192,6 +208,7 @@ bool GraphicsClass::Render() const
     //                            m_light->GetSpecularColor(), m_light->GetSpecularPower()))
     //     return false;
 
+    // 버퍼의 내용 화면에 출력
     m_direct3D->EndScene();
 
     return true;

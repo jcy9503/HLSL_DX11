@@ -1,6 +1,4 @@
 #pragma once
-#include "BitmapClass.h"
-#include "TextureShaderClass.h"
 
 constexpr bool FULL_SCREEN = false;
 constexpr bool VSYNC_ENABLED = true;
@@ -20,7 +18,7 @@ public:
 
     bool Initialize(int, int, HWND);
     void Shutdown();
-    void Frame() const;
+    bool Frame(int, int) const;
     bool Render() const;
 
 private:

@@ -15,7 +15,7 @@ public:
     void Shutdown();
     void Run() const;
 
-    LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM) const;
+    static LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
     bool Frame() const;
@@ -28,7 +28,7 @@ private:
     HWND m_hwnd{};
 
     InputClass* m_input = nullptr;
-    GraphicsClass* m_Graphics = nullptr;
+    GraphicsClass* m_graphics = nullptr;
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
