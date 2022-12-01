@@ -8,6 +8,8 @@ constexpr float SCREEN_NEAR = 0.1f;
 class D3DClass;
 class CameraClass;
 class TextClass;
+class BitmapClass;
+class TextureShaderClass;
 
 class GraphicsClass
 {
@@ -25,4 +27,6 @@ private:
     D3DClass* m_direct3D = nullptr;
     CameraClass* m_camera = nullptr;
     TextClass* m_text = nullptr;
+    BitmapClass* m_bitmap = nullptr;
+    TextureShaderClass* m_textureShader = nullptr;
 };

@@ -190,7 +190,7 @@ bool TextClass::InitializeSentence(SentenceType** sentence, const int maxLength,
     result = device->CreateBuffer(&indexBufferDesc, &indexData, &(*sentence)->indexBuffer);
     if (FAILED(result))
         return false;
-    
+
     delete[] vertices;
     vertices = nullptr;
 
@@ -277,8 +277,8 @@ bool TextClass::RenderSentence(ID3D11DeviceContext* deviceContext, const Sentenc
                                const XMMATRIX orthoMatrix) const
 {
     // Vertex Buffer 간격 및 오프셋 변수 생성
-    unsigned int stride = sizeof(VertexType);
-    unsigned int offset = 0;
+    constexpr unsigned int stride = sizeof(VertexType);
+    constexpr unsigned int offset = 0;
 
     // 렌더링할 수 있도록 입력 어셈블러에서 Vertex Buffer를 활성으로 설정
     deviceContext->IASetVertexBuffers(0, 1, &sentence->vertexBuffer, &stride, &offset);
@@ -293,8 +293,8 @@ bool TextClass::RenderSentence(ID3D11DeviceContext* deviceContext, const Sentenc
     const auto pixelColor = XMFLOAT4(sentence->red, sentence->green, sentence->blue, 1.0f);
 
     // 폰트 셰이더를 사용하여 텍스트 렌더링
-    bool result = m_fontShader->Render(deviceContext, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix, m_font->GetTexture(),
-        pixelColor);
+    const bool result = m_fontShader->Render(deviceContext, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix,
+        m_font->GetTexture(), pixelColor);
     if (!result)
         return false;
 
@@ -311,7 +311,7 @@ bool TextClass::SetMousePosition(const int mouseX, const int mouseY, ID3D11Devic
     strcpy_s(mouseStr, "Mouse X: ");
     strcat_s(mouseStr, tpStr);
 
-    if(!UpdateSentence(m_sentence1, mouseStr, 20, 20, 1.0f, 1.0f, 1.0f, deviceContext))
+    if (!UpdateSentence(m_sentence1, mouseStr, 20, 20, 1.0f, 1.0f, 1.0f, deviceContext))
         return false;
 
     // mouseY 정수 -> 문자열
@@ -320,7 +320,7 @@ bool TextClass::SetMousePosition(const int mouseX, const int mouseY, ID3D11Devic
     strcpy_s(mouseStr, "Mouse Y: ");
     strcat_s(mouseStr, tpStr);
 
-    if(!UpdateSentence(m_sentence2, mouseStr, 20, 40, 1.0f, 1.0f, 1.0f, deviceContext))
+    if (!UpdateSentence(m_sentence2, mouseStr, 20, 40, 1.0f, 1.0f, 1.0f, deviceContext))
         return false;
 
     return true;

@@ -34,13 +34,14 @@ void BitmapClass::Shutdown()
     ShutdownBuffers();
 }
 
-bool BitmapClass::Render(ID3D11DeviceContext* deviceContext, const int positionX, const int positionY)
+void BitmapClass::Render(ID3D11DeviceContext* deviceContext) const
 {
-    if (!UpdateBuffers(deviceContext, positionX, positionY)) return false;
+    constexpr UINT stride = sizeof(VertexType);
+    constexpr UINT offset = 0;
 
-    RenderBuffers(deviceContext);
-
-    return true;
+    deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+    deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 int BitmapClass::GetIndexCount() const
@@ -125,8 +126,6 @@ void BitmapClass::ShutdownBuffers()
 
 bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
 {
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-
     if ((positionX == m_previousPosX) && (positionY == m_previousPosY)) return true;
 
     m_previousPosX = positionX;
@@ -158,6 +157,7 @@ bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int position
     vertices[5].position = XMFLOAT3(right, bottom, 0.0f);
     vertices[5].texture = XMFLOAT2(1.0f, 1.0f);
 
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
     HRESULT result = deviceContext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(result)) return false;
 
@@ -173,17 +173,7 @@ bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int position
     return true;
 }
 
-void BitmapClass::RenderBuffers(ID3D11DeviceContext* deviceContext) const
-{
-    constexpr UINT stride = sizeof(VertexType);
-    constexpr UINT offset = 0;
-
-    deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-    deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-
-bool BitmapClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+bool BitmapClass::LoadTexture(ID3D11Device* device, const WCHAR* filename)
 {
     m_texture = new TextureClass;
     if (!m_texture) return false;
@@ -199,4 +189,12 @@ void BitmapClass::ReleaseTexture()
         delete m_texture;
         m_texture = nullptr;
     }
+}
+
+bool BitmapClass::SetMousePosition(ID3D11DeviceContext* deviceContext, const int mouseX, const int mouseY)
+{
+    if(!UpdateBuffers(deviceContext, mouseX, mouseY))
+        return false;
+
+    return true;
 }

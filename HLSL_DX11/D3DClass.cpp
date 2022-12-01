@@ -322,8 +322,13 @@ void D3DClass::Shutdown()
 
 void D3DClass::BeginScene(const float red, const float green, const float blue, const float alpha) const
 {
+    // Buffer를 지울 색 결정
     const float color[4] = {red, green, blue, alpha};
+
+    // Back Buffer 지우기
     m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
+
+    // Depth Buffer 지우기
     m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 

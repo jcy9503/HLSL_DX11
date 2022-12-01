@@ -18,7 +18,8 @@ public:
 
     bool Initialize(ID3D11Device*, int, int, WCHAR*, int, int);
     void Shutdown();
-    bool Render(ID3D11DeviceContext*, int, int);
+    void Render(ID3D11DeviceContext*) const;
+    bool SetMousePosition(ID3D11DeviceContext*, const int, const int);
 
     int GetIndexCount() const;
     ID3D11ShaderResourceView* GetTexture() const;
@@ -27,9 +28,8 @@ private:
     bool Initializebuffers(ID3D11Device*);
     void ShutdownBuffers();
     bool UpdateBuffers(ID3D11DeviceContext*, int, int);
-    void RenderBuffers(ID3D11DeviceContext*) const;
 
-    bool LoadTexture(ID3D11Device*, WCHAR*);
+    bool LoadTexture(ID3D11Device*, const WCHAR*);
     void ReleaseTexture();
 
 private:

@@ -2,6 +2,8 @@
 #include "D3DClass.h"
 #include "Cameraclass.h"
 #include "TextClass.h"
+#include "BitmapClass.h"
+#include "TextureShaderClass.h"
 #include "GraphicsClass.h"
 
 GraphicsClass::GraphicsClass()
@@ -36,28 +38,29 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
 
     // 텍스트 객체 생성
     m_text = new TextClass;
-    if(!m_text) return false;
-    if(!m_text->Initialize(m_direct3D->GetDevice(), m_direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix))
+    if (!m_text) return false;
+    if (!m_text->Initialize(m_direct3D->GetDevice(), m_direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix))
     {
-        MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK|MB_ICONERROR);
+        MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
-    
-    // m_textureShader = new TextureShaderClass;
-    // if (!m_textureShader) return false;
-    // if (!m_textureShader->Initialize(m_direct3D->GetDevice(), hwnd))
-    // {
-    //     MessageBox(hwnd, L"Could not initialize the Texture shader object", L"Error", MB_OK | MB_ICONERROR);
-    //     return false;
-    // }
-    //
-    // m_bitmap = new BitmapClass;
-    // if (!m_bitmap) return false;
-    // if (!m_bitmap->Initialize(m_direct3D->GetDevice(), screenWidth, screenHeight, L"../HLSL_DX11/Demo11/seafloor.dds", 512, 512))
-    // {
-    //     MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK | MB_ICONERROR);
-    //     return false;
-    // }
+
+    m_textureShader = new TextureShaderClass;
+    if (!m_textureShader) return false;
+    if (!m_textureShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    {
+        MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    WCHAR cursor[] = L"../HLSL_DX11/Demo10/sample.dds";
+    m_bitmap = new BitmapClass;
+    if (!m_bitmap) return false;
+    if (!m_bitmap->Initialize(m_direct3D->GetDevice(), screenWidth, screenHeight, cursor, 50, 50))
+    {
+        MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
 
     // m_model = new ModelClass;
     // constexpr char filePath[] = "../HLSL_DX11/Demo07/cube.txt";
@@ -102,26 +105,26 @@ void GraphicsClass::Shutdown()
         m_camera = nullptr;
     }
 
-    if(m_text)
+    if (m_text)
     {
         m_text->Shutdown();
         delete m_text;
         m_text = nullptr;
     }
 
-    // if (m_textureShader)
-    // {
-    //     m_textureShader->Shutdown();
-    //     delete m_textureShader;
-    //     m_textureShader = nullptr;
-    // }
-    //
-    // if (m_bitmap)
-    // {
-    //     m_bitmap->Shutdown();
-    //     delete m_bitmap;
-    //     m_bitmap = nullptr;
-    // }
+    if (m_textureShader)
+    {
+        m_textureShader->Shutdown();
+        delete m_textureShader;
+        m_textureShader = nullptr;
+    }
+
+    if (m_bitmap)
+    {
+        m_bitmap->Shutdown();
+        delete m_bitmap;
+        m_bitmap = nullptr;
+    }
 
     // if (m_model)
     // {
@@ -144,7 +147,7 @@ void GraphicsClass::Shutdown()
     // }
 }
 
-bool GraphicsClass::Frame(int mouseX, int mouseY) const
+bool GraphicsClass::Frame(const int mouseX, const int mouseY) const
 {
     // static float rotation = 0.0f;
     //
@@ -153,8 +156,12 @@ bool GraphicsClass::Frame(int mouseX, int mouseY) const
     //
     // return Render(rotation);
 
-    if(!m_text->SetMousePosition(mouseX, mouseY, m_direct3D->GetDeviceContext()))
+    if (!m_text->SetMousePosition(mouseX, mouseY, m_direct3D->GetDeviceContext()))
         return false;
+
+    if(!m_bitmap->SetMousePosition(m_direct3D->GetDeviceContext(), mouseX, mouseY))
+        return false;
+
     m_camera->SetPosition(0.0f, 0.0f, -10.0f);
 
     return true;
@@ -170,7 +177,7 @@ bool GraphicsClass::Render() const
 
     // 카메라 및 D3D 객체에서 월드, 뷰, 투영 행렬 획득
     XMMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
-    
+
     m_camera->GetViewMatrix(viewMatrix);
     m_direct3D->GetWorldMatrix(worldMatrix);
     m_direct3D->GetProjectionmatrix(projectionMatrix);
@@ -182,8 +189,13 @@ bool GraphicsClass::Render() const
     // 텍스트 렌더링을 위해 알파 블렌딩 켜기
     m_direct3D->TurnOnAlphaBlending();
 
+    m_bitmap->Render(m_direct3D->GetDeviceContext());
+    if (!m_textureShader->Render(m_direct3D->GetDeviceContext(), m_bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
+        m_bitmap->GetTexture()))
+            return false;
+
     // 텍스트 문자열 렌더링
-    if(!m_text->Render(m_direct3D->GetDeviceContext(), worldMatrix, orthoMatrix))
+    if (!m_text->Render(m_direct3D->GetDeviceContext(), worldMatrix, orthoMatrix))
         return false;
 
     m_direct3D->TurnOffAlphaBlending();
