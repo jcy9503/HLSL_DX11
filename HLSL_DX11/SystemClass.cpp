@@ -87,7 +87,7 @@ void SystemClass::Run() const
             }
         }
         // ESC¸¦ ´­·¶À» °æ¿ì
-        if(m_input->IsEscapePressed() == true)
+        if(m_input->IsEscapePressed())
             break;
     }
 }
@@ -103,6 +103,13 @@ bool SystemClass::Frame() const
 
     if(!m_graphics->Frame(mouseX, mouseY))
         return false;
+
+    const char inputKey = m_input->ReturnKey();
+    if(inputKey != -1)
+    {
+        printf("%c", inputKey);
+        m_graphics->InputKey(inputKey);
+    }
     
     return m_graphics->Render();
 }

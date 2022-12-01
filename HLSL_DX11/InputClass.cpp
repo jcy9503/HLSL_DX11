@@ -143,6 +143,17 @@ bool InputClass::IsEscapePressed() const
     return false;
 }
 
+char InputClass::ReturnKey() const
+{
+    for(int i = 0; i < 256; ++i)
+    {
+        if(m_keyboardState[i] & 0x80)
+            return m_keys[i];
+    }
+
+    return -1;
+}
+
 void InputClass::GetMouseLocation(int& mouseX, int& mouseY) const
 {
     mouseX = m_mouseX;

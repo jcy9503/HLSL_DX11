@@ -1,7 +1,5 @@
 #pragma once
 
-#define DIRECTINPUT_VERSION 0x0800
-
 class InputClass
 {
 public:
@@ -17,6 +15,7 @@ public:
     bool Frame();
 
     bool IsEscapePressed() const;
+    char ReturnKey() const;
     void GetMouseLocation(int&, int&) const;
 
 private:
@@ -30,6 +29,11 @@ private:
     IDirectInputDevice8* m_mouse = nullptr;
 
     unsigned char m_keyboardState[256] = {0,};
+    char m_keys[256] = {
+        '!', '!', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '!', '!', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+        '[', ']', '!', '!', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', '\'', '!', '!', '!', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',',
+        '.', '/',
+    };
     DIMOUSESTATE m_mouseState{};
 
     int m_screenWidth = 0;

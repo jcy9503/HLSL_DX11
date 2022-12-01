@@ -162,8 +162,6 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY) const
     if(!m_bitmap->SetMousePosition(m_direct3D->GetDeviceContext(), mouseX, mouseY))
         return false;
 
-    m_camera->SetPosition(0.0f, 0.0f, -10.0f);
-
     return true;
 }
 
@@ -222,6 +220,14 @@ bool GraphicsClass::Render() const
 
     // 버퍼의 내용 화면에 출력
     m_direct3D->EndScene();
+
+    return true;
+}
+
+bool GraphicsClass::InputKey(const char input) const
+{
+    if(!m_text->KeyInput(m_direct3D->GetDeviceContext(), input))
+        return false;
 
     return true;
 }

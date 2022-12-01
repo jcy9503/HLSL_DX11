@@ -2,6 +2,7 @@
 
 #define _WIN32_WINNT 0x0600
 #define WIN32_LEAN_AND_MEAN
+#define DIRECTINPUT_VERSION 0x0800
 constexpr float RADIAN = 0.0174532925f;
 
 #include "targetver.h"

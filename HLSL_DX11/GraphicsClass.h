@@ -22,6 +22,7 @@ public:
     void Shutdown();
     bool Frame(int, int) const;
     bool Render() const;
+    bool InputKey(char) const;
 
 private:
     D3DClass* m_direct3D = nullptr;

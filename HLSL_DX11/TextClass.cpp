@@ -14,8 +14,8 @@ TextClass::TextClass(const TextClass& other)
 TextClass::~TextClass()
 = default;
 
-bool TextClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight,
-                           const XMMATRIX baseViewMatrix)
+bool TextClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const HWND hwnd, const int screenWidth,
+                           const int screenHeight, const XMMATRIX baseViewMatrix)
 {
     m_screenWidth = screenWidth;
     m_screenHeight = screenHeight;
@@ -58,7 +58,7 @@ bool TextClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 
     // 문장 Vertex Buffer를 새 문자열 정보로 업데이트
     constexpr char tp1[] = "God Damn";
-    result = UpdateSentence(m_sentence1, tp1, 100, 100, 1.0f, 1.0f, 1.0f, deviceContext);
+    result = UpdateSentence(m_sentence1, tp1, 20, 20, 1.0f, 1.0f, 1.0f, deviceContext);
     if (!result)
         return false;
 
@@ -69,7 +69,16 @@ bool TextClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCont
 
     // 문장 Vertex Buffer 새 문자열 정보로 업데이트
     constexpr char tp2[] = "Goodbye";
-    result = UpdateSentence(m_sentence2, tp2, 100, 200, 1.0f, 1.0f, 0.0f, deviceContext);
+    result = UpdateSentence(m_sentence2, tp2, 20, 40, 1.0f, 1.0f, 1.0f, deviceContext);
+    if (!result)
+        return false;
+
+    result = InitializeSentence(&m_key, 16, device);
+    if (!result)
+        return false;
+
+    constexpr char tp3[] = "Init";
+    result = UpdateSentence(m_key, tp3, 20, 60, 1.0f, 1.0f, 1.0f, deviceContext);
     if (!result)
         return false;
 
@@ -81,6 +90,7 @@ void TextClass::Shutdown()
 {
     ReleaseSentence(&m_sentence1);
     ReleaseSentence(&m_sentence2);
+    ReleaseSentence(&m_key);
 
     if (m_fontShader)
     {
@@ -107,6 +117,10 @@ bool TextClass::Render(ID3D11DeviceContext* deviceContext, const XMMATRIX worldM
 
     // 둘째 문장 렌더링
     result = RenderSentence(deviceContext, m_sentence2, worldMatrix, orthoMatrix);
+    if (!result)
+        return false;
+
+    result = RenderSentence(deviceContext, m_key, worldMatrix, orthoMatrix);
     if (!result)
         return false;
 
@@ -231,7 +245,7 @@ bool TextClass::UpdateSentence(SentenceType* sentence, const char* text, const i
 
     // Vertex Buffer를 쓰기 위해 잠금.
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    HRESULT result = deviceContext->Map(sentence->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    const HRESULT result = deviceContext->Map(sentence->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(result))
         return false;
 
@@ -321,6 +335,16 @@ bool TextClass::SetMousePosition(const int mouseX, const int mouseY, ID3D11Devic
     strcat_s(mouseStr, tpStr);
 
     if (!UpdateSentence(m_sentence2, mouseStr, 20, 40, 1.0f, 1.0f, 1.0f, deviceContext))
+        return false;
+
+    return true;
+}
+
+bool TextClass::KeyInput(ID3D11DeviceContext* deviceContext, const char input) const
+{
+    const char tp[16] = {input, };
+
+    if (!UpdateSentence(m_key, tp, 20, 60, 1.0f, 0.0f, 0.0f, deviceContext))
         return false;
 
     return true;

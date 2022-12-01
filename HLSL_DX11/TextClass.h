@@ -29,6 +29,7 @@ public:
 	bool Render(ID3D11DeviceContext*, XMMATRIX, XMMATRIX) const;
 
 	bool SetMousePosition(int, int, ID3D11DeviceContext*) const;
+	bool KeyInput(ID3D11DeviceContext*, const char) const;
 
 private:
 	static bool InitializeSentence(SentenceType**, int, ID3D11Device*);
@@ -44,4 +45,5 @@ private:
 	XMMATRIX m_baseViewMatrix;
 	SentenceType* m_sentence1;
 	SentenceType* m_sentence2;
+	SentenceType* m_key;
 };
