@@ -4,6 +4,11 @@
 #include "TextClass.h"
 #include "BitmapClass.h"
 #include "TextureShaderClass.h"
+#include "Modelclass.h"
+#include "ModelListClass.h"
+#include "LightClass.h"
+#include "LightShaderClass.h"
+#include "FrustumClass.h"
 #include "GraphicsClass.h"
 
 GraphicsClass::GraphicsClass()
@@ -18,7 +23,6 @@ GraphicsClass::~GraphicsClass()
 
 bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, const HWND hwnd)
 {
-    // Direct3D 객체 생성/초기화
     m_direct3D = new D3DClass;
     if (!m_direct3D) return false;
     if (!m_direct3D->Initialize(screenWidth, screenHeight, VSYNC_ENABLED, hwnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR))
@@ -27,16 +31,14 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         return false;
     }
 
-    // 카메라 객체 생성/위치 설정
     m_camera = new CameraClass;
     if (!m_camera) return false;
-    m_camera->SetPosition(0.0f, 0.0f, -10.0f);
+    m_camera->SetPosition(0.0f, 0.0f, -1.0f);
 
     XMMATRIX baseViewMatrix;
     m_camera->Render();
     m_camera->GetViewMatrix(baseViewMatrix);
 
-    // 텍스트 객체 생성
     m_text = new TextClass;
     if (!m_text) return false;
     if (!m_text->Initialize(m_direct3D->GetDevice(), m_direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix))
@@ -61,6 +63,39 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
+
+    const char model[] = "../HLSL_DX11/Demo16/sphere.txt";
+    WCHAR tex[] = L"../HLSL_DX11/Demo16/sample.dds";
+    m_model = new ModelClass;
+    if (!m_model) return false;
+    if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex))
+    {
+        MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    m_lightShader = new LightShaderClass;
+    if (!m_lightShader) return false;
+    if (!m_lightShader->Initialize(m_direct3D->GetDevice(), hwnd, 1))
+    {
+        MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    m_light = new LightClass;
+    if (!m_light) return false;
+    m_light->SetDirection(0.0f, 0.0f, 1.0f);
+
+    m_modelList = new ModelListClass;
+    if (!m_modelList) return false;
+    if (!m_modelList->Initialize(25))
+    {
+        MessageBox(hwnd, L"Could not initialize the model list object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    m_frustum = new FrustumClass;
+    if (!m_frustum) return false;
 
     // m_model = new ModelClass;
     // constexpr char filePath[] = "../HLSL_DX11/Demo07/cube.txt";
@@ -126,28 +161,41 @@ void GraphicsClass::Shutdown()
         m_bitmap = nullptr;
     }
 
-    // if (m_model)
-    // {
-    //     m_model->Shutdown();
-    //     delete m_model;
-    //     m_model = nullptr;
-    // }
-    //
-    // if (m_light)
-    // {
-    //     delete m_light;
-    //     m_light = nullptr;
-    // }
-    //
-    // if (m_lightShader)
-    // {
-    //     m_lightShader->Shutdown();
-    //     delete m_lightShader;
-    //     m_lightShader = nullptr;
-    // }
+    if (m_model)
+    {
+        m_model->Shutdown();
+        delete m_model;
+        m_model = nullptr;
+    }
+
+    if (m_modelList)
+    {
+        m_modelList->Shutdown();
+        delete m_modelList;
+        m_modelList = nullptr;
+    }
+
+    if (m_light)
+    {
+        delete m_light;
+        m_light = nullptr;
+    }
+
+    if (m_lightShader)
+    {
+        m_lightShader->Shutdown();
+        delete m_lightShader;
+        m_lightShader = nullptr;
+    }
+
+    if (m_frustum)
+    {
+        delete m_frustum;
+        m_frustum = nullptr;
+    }
 }
 
-bool GraphicsClass::Frame(const int mouseX, const int mouseY, int fps, int cpu, float frameTime) const
+bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, const int cpu, float frameTime, float rotationY) const
 {
     // static float rotation = 0.0f;
     //
@@ -164,9 +212,12 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY, int fps, int cpu, 
 
     if (!m_text->SetFps(m_direct3D->GetDeviceContext(), fps))
         return false;
-
+    
     if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
         return false;
+
+    m_camera->SetPosition(0.0f, 0.0f, -10.0f);
+    m_camera->SetRotation(0.0f, rotationY, 0.0f);
 
     return true;
 }
@@ -186,6 +237,36 @@ bool GraphicsClass::Render() const
     m_direct3D->GetWorldMatrix(worldMatrix);
     m_direct3D->GetProjectionmatrix(projectionMatrix);
     m_direct3D->GetOrthoMatrix(orthoMatrix);
+
+    float positionX = 0.0f;
+    float positionY = 0.0f;
+    float positionZ = 0.0f;
+    XMFLOAT4 color;
+
+    m_frustum->ConstructFrustum(SCREEN_DEPTH, projectionMatrix, viewMatrix);
+    const int modelCount = m_modelList->GetModelCount();
+    int renderCount = 0;
+
+    for (int index = 0; index < modelCount; ++index)
+    {
+        constexpr float radius = 1.0f;
+        m_modelList->GetData(index, positionX, positionY, positionZ, color);
+
+        if (m_frustum->CheckSphere(positionX, positionY, positionZ, radius))
+        {
+            worldMatrix = XMMatrixTranslation(positionX, positionY, positionZ);
+            m_model->Render(m_direct3D->GetDeviceContext());
+            m_lightShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+                m_model->GetTexture(), m_light->GetDirection(), XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), color, XMFLOAT3(0.0f, 0.0f, 0.0f),
+                XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), 0);
+            m_direct3D->GetWorldMatrix(worldMatrix);
+
+            ++renderCount;
+        }
+    }
+
+    if(!m_text->SetRenderCount(m_direct3D->GetDeviceContext(), renderCount))
+        return false;
 
     // 2D 렌더링을 위해 Z Buffer 끄기
     m_direct3D->TurnZBufferOff();

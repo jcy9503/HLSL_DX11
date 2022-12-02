@@ -163,6 +163,7 @@
     <ClCompile Include="FontClass.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
     <ClCompile Include="FPSClass.cpp" />
+    <ClCompile Include="FrustumClass.cpp" />
     <ClCompile Include="GraphicsClass.cpp" />
     <ClCompile Include="HLSL_DX11.cpp" />
     <ClCompile Include="InputClass.cpp" />
@@ -170,6 +171,8 @@
     <ClCompile Include="LightShaderClass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Modelclass.cpp" />
+    <ClCompile Include="ModelListClass.cpp" />
+    <ClCompile Include="PositionClass.cpp" />
     <ClCompile Include="SoundClass.cpp" />
     <ClCompile Include="Stdafx.cpp" />
     <ClCompile Include="SystemClass.cpp" />
@@ -190,11 +193,14 @@
     <ClInclude Include="FontClass.h" />
     <ClInclude Include="FontShaderClass.h" />
     <ClInclude Include="FPSClass.h" />
+    <ClInclude Include="FrustumClass.h" />
     <ClInclude Include="GraphicsClass.h" />
     <ClInclude Include="InputClass.h" />
     <ClInclude Include="LightClass.h" />
     <ClInclude Include="LightShaderClass.h" />
     <ClInclude Include="Modelclass.h" />
+    <ClInclude Include="ModelListClass.h" />
+    <ClInclude Include="PositionClass.h" />
     <ClInclude Include="SoundClass.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="SystemClass.h" />
@@ -222,10 +228,16 @@
     <Content Include="Demo09\Light.vs" />
     <Content Include="Demo10\Light.ps" />
     <Content Include="Demo10\Light.vs" />
+    <Content Include="Demo16\sample.dds" />
+    <Content Include="Demo16\sample.txt" />
     <Content Include="FontData\font.dds" />
     <Content Include="FontData\Font.ps" />
     <Content Include="FontData\Font.vs" />
     <Content Include="FontData\fontdata.txt" />
+    <Content Include="LightShader\DirLight.ps" />
+    <Content Include="LightShader\DirLight.vs" />
+    <Content Include="LightShader\PointLight.ps" />
+    <Content Include="LightShader\PointLight.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

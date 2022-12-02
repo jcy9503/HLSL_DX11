@@ -30,6 +30,7 @@ public:
 
     bool SetMousePosition(int, int, ID3D11DeviceContext*) const;
     bool KeyInput(ID3D11DeviceContext*, const char) const;
+    bool SetRenderCount(ID3D11DeviceContext*, int) const;
 
     bool SetFps(ID3D11DeviceContext*, int) const;
     bool SetCpu(ID3D11DeviceContext*, int) const;

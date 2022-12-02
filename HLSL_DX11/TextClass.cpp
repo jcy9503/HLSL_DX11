@@ -340,16 +340,6 @@ bool TextClass::SetMousePosition(const int mouseX, const int mouseY, ID3D11Devic
     return true;
 }
 
-bool TextClass::KeyInput(ID3D11DeviceContext* deviceContext, const char input) const
-{
-    const char tp[16] = {input,};
-
-    if (!UpdateSentence(m_key, tp, 20, 60, 1.0f, 0.0f, 0.0f, deviceContext))
-        return false;
-
-    return true;
-}
-
 bool TextClass::SetFps(ID3D11DeviceContext* deviceContext, int fps) const
 {
     // FPS를 10000 미만으로 자름
@@ -399,4 +389,26 @@ bool TextClass::SetCpu(ID3D11DeviceContext* deviceContext, const int cpu) const
     strcat_s(cpuStr, "%");
 
     return UpdateSentence(m_sentence2, cpuStr, 20, 40, 0.0f, 1.0f, 0.0f, deviceContext);
+}
+
+bool TextClass::KeyInput(ID3D11DeviceContext* deviceContext, const char input) const
+{
+    const char tp[16] = {input,};
+
+    if (!UpdateSentence(m_key, tp, 20, 60, 1.0f, 0.0f, 0.0f, deviceContext))
+        return false;
+
+    return true;
+}
+
+bool TextClass::SetRenderCount(ID3D11DeviceContext* deviceContext, const int count) const
+{
+    char tpStr[16] = {0,};
+    _itoa_s(count, tpStr, 10);
+
+    char countStr[16] = {0,};
+    strcpy_s(countStr, "Total: ");
+    strcat_s(countStr, tpStr);
+
+    return UpdateSentence(m_key, countStr, 20, 60, 1.0f, 1.0f, 1.0f, deviceContext);
 }

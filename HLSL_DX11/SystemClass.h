@@ -7,6 +7,7 @@ class SoundClass;
 class FpsClass;
 class CpuClass;
 class TimerClass;
+class PositionClass;
 
 class SystemClass
 {
@@ -37,6 +38,7 @@ private:
     FpsClass* m_fps = nullptr;
     CpuClass* m_cpu = nullptr;
     TimerClass* m_timer = nullptr;
+    PositionClass* m_position = nullptr;
 };
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

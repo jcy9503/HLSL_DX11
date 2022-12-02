@@ -31,7 +31,7 @@ public:
     LightShaderClass(const LightShaderClass&);
     ~LightShaderClass();
 
-    bool Initialize(ID3D11Device*, HWND);
+    bool Initialize(ID3D11Device*, HWND, int);
     void Shutdown();
     bool Render(ID3D11DeviceContext*, int, XMMATRIX, XMMATRIX, XMMATRIX, ID3D11ShaderResourceView*, XMFLOAT3,
                 XMFLOAT4, XMFLOAT4, XMFLOAT3, XMFLOAT4, float) const;
@@ -46,6 +46,7 @@ private:
     void RenderShader(ID3D11DeviceContext*, int) const;
 
 private:
+    int m_lightVersion = -1; // 0: Point Light, 1: Directional Light, 2: Spot Light(not implemented yet)
     ID3D11VertexShader* m_vertexShader = nullptr;
     ID3D11PixelShader* m_pixelShader = nullptr;
     ID3D11InputLayout* m_layout = nullptr;

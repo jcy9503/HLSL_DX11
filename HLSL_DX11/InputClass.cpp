@@ -143,6 +143,22 @@ bool InputClass::IsEscapePressed() const
     return false;
 }
 
+bool InputClass::IsLeftArrowPressed() const
+{
+    if(m_keyboardState[DIK_LEFT] & 0x80)
+        return true;
+    
+    return false;
+}
+
+bool InputClass::IsRightArrowPressed() const
+{
+    if(m_keyboardState[DIK_RIGHT] * 0x80)
+        return true;
+
+    return false;
+}
+
 char InputClass::ReturnKey() const
 {
     for(int i = 0; i < 256; ++i)

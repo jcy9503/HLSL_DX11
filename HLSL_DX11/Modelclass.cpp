@@ -157,7 +157,8 @@ bool ModelClass::LoadModel(const char* filename)
 
     char input = 0;
     fin.get(input);
-    while(input != ':') fin.get(input);
+    while(input != ':')
+        fin.get(input);
 
     fin >> m_vertexCount;
     m_indexCount = m_vertexCount;

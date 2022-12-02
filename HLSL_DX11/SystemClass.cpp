@@ -5,6 +5,7 @@
 #include "FPSClass.h"
 #include "CPUClass.h"
 #include "TimerClass.h"
+#include "PositionClass.h"
 #include "SystemClass.h"
 
 SystemClass::SystemClass()
@@ -71,6 +72,9 @@ bool SystemClass::Initialize()
         return false;
     }
 
+    m_position = new PositionClass;
+    if(!m_position) return false;
+
     return true;
 }
 
@@ -114,6 +118,12 @@ void SystemClass::Shutdown()
     {
         delete m_timer;
         m_timer = nullptr;
+    }
+
+    if(m_position)
+    {
+        delete m_position;
+        m_position = nullptr;
     }
 
     ShutdownWindows();
@@ -161,18 +171,29 @@ bool SystemClass::Frame() const
 
     m_input->GetMouseLocation(mouseX, mouseY);
 
-    const char inputKey = m_input->ReturnKey();
-    if (inputKey != -1)
-    {
-        // printf("%c", inputKey);
-        m_graphics->InputKey(inputKey);
-    }
+    // const char inputKey = m_input->ReturnKey();
+    // if (inputKey != -1)
+    // {
+    //     // printf("%c", inputKey);
+    //     // m_graphics->InputKey(inputKey);
+    // }
 
     m_timer->Frame();
     m_fps->Frame();
     m_cpu->Frame();
 
-    if (!m_graphics->Frame(mouseX, mouseY, m_fps->GetFps(), m_cpu->GetCpuPercentage(), m_timer->GetTime()))
+    m_position->SetFrameTime(m_timer->GetTime());
+    
+    bool keyDown = m_input->IsLeftArrowPressed();
+    m_position->TurnLeft(keyDown);
+
+    keyDown = m_input->IsRightArrowPressed();
+    m_position->TurnRight(keyDown);
+    
+    float rotationY = 0.0f;
+    m_position->GetRotation(rotationY);
+
+    if (!m_graphics->Frame(mouseX, mouseY, m_fps->GetFps(), m_cpu->GetCpuPercentage(), m_timer->GetTime(), rotationY))
         return false;
 
     return m_graphics->Render();

@@ -18,6 +18,8 @@ public:
     bool Frame();
 
     bool IsEscapePressed() const;
+    bool IsLeftArrowPressed() const;
+    bool IsRightArrowPressed() const;
     char ReturnKey() const;
     void GetMouseLocation(int&, int&) const;
 
