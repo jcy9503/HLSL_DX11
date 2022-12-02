@@ -1,6 +1,7 @@
 #include "Stdafx.h"
 #include "InputClass.h"
 #include "graphicsclass.h"
+#include "SoundClass.h"
 #include "SystemClass.h"
 
 SystemClass::SystemClass()
@@ -23,9 +24,7 @@ bool SystemClass::Initialize()
 
     // m_input : 마우스와 키보드 입력 처리 클래스
     m_input = new InputClass;
-    if (!m_input)
-        return false;
-
+    if (!m_input) return false;
     if (!m_input->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight))
     {
         MessageBox(m_hwnd, L"Could not initialize the input object.", L"Error", MB_OK | MB_ICONERROR);
@@ -34,10 +33,23 @@ bool SystemClass::Initialize()
 
     // m_graphics : 그래픽 렌더링 처리 클래스
     m_graphics = new GraphicsClass;
-    if (!m_graphics)
+    if (!m_graphics) return false;
+    if (!m_graphics->Initialize(screenWidth, screenHeight, m_hwnd))
+    {
+        MessageBox(m_hwnd, L"Could not initialize Graphics object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
+    }
 
-    return m_graphics->Initialize(screenWidth, screenHeight, m_hwnd);
+    // m_sound : 다이렉트 사운드 클래스
+    m_sound = new SoundClass;
+    if (!m_sound) return false;
+    if (!m_sound->Initialize(m_hwnd))
+    {
+        MessageBox(m_hwnd, L"Could not initialize Direct sound object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    return true;
 }
 
 void SystemClass::Shutdown()
@@ -54,6 +66,13 @@ void SystemClass::Shutdown()
         m_input->Shutdown();
         delete m_input;
         m_input = nullptr;
+    }
+
+    if (m_sound)
+    {
+        m_sound->Shutdown();
+        delete m_sound;
+        m_sound = nullptr;
     }
 
     ShutdownWindows();
@@ -82,12 +101,12 @@ void SystemClass::Run() const
             // 프레임 처리
             if (!Frame())
             {
-                MessageBox(m_hwnd, L"Frame Processing Failed", L"Error", MB_OK|MB_ICONERROR);
+                MessageBox(m_hwnd, L"Frame Processing Failed", L"Error", MB_OK | MB_ICONERROR);
                 break;
             }
         }
         // ESC를 눌렀을 경우
-        if(m_input->IsEscapePressed())
+        if (m_input->IsEscapePressed())
             break;
     }
 }
@@ -95,22 +114,22 @@ void SystemClass::Run() const
 bool SystemClass::Frame() const
 {
     int mouseX = 0, mouseY = 0;
-    
-    if(!m_input->Frame())
+
+    if (!m_input->Frame())
         return false;
 
     m_input->GetMouseLocation(mouseX, mouseY);
 
-    if(!m_graphics->Frame(mouseX, mouseY))
+    if (!m_graphics->Frame(mouseX, mouseY))
         return false;
 
     const char inputKey = m_input->ReturnKey();
-    if(inputKey != -1)
+    if (inputKey != -1)
     {
-        printf("%c", inputKey);
+        // printf("%c", inputKey);
         m_graphics->InputKey(inputKey);
     }
-    
+
     return m_graphics->Render();
 }
 
@@ -215,19 +234,19 @@ LRESULT WndProc(const HWND hwnd, const UINT umsg, const WPARAM wparam, const LPA
 {
     switch (umsg)
     {
-        // 윈도우 종료 확인
+    // 윈도우 종료 확인
     case WM_DESTROY:
     {
         PostQuitMessage(0);
         return 0;
     }
-        // 윈도우 창 닫음 확인
+    // 윈도우 창 닫음 확인
     case WM_CLOSE:
     {
         PostQuitMessage(0);
         return 0;
     }
-        // 그 외 모든 메시지는 시스템 클래스 메시지 처리로 넘김.
+    // 그 외 모든 메시지는 시스템 클래스 메시지 처리로 넘김.
     default:
     {
         return ApplicationHandle->MessageHandler(hwnd, umsg, wparam, lparam);

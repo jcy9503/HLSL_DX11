@@ -7,7 +7,7 @@
 TextClass::TextClass()
 = default;
 
-TextClass::TextClass(const TextClass& other)
+TextClass::TextClass(const TextClass& other): m_baseViewMatrix(), m_sentence1(nullptr), m_sentence2(nullptr), m_key(nullptr)
 {
 }
 
@@ -287,7 +287,7 @@ void TextClass::ReleaseSentence(SentenceType** sentence)
 }
 
 
-bool TextClass::RenderSentence(ID3D11DeviceContext* deviceContext, const SentenceType* sentence, XMMATRIX worldMatrix,
+bool TextClass::RenderSentence(ID3D11DeviceContext* deviceContext, const SentenceType* sentence, const XMMATRIX worldMatrix,
                                const XMMATRIX orthoMatrix) const
 {
     // Vertex Buffer 간격 및 오프셋 변수 생성
@@ -342,7 +342,7 @@ bool TextClass::SetMousePosition(const int mouseX, const int mouseY, ID3D11Devic
 
 bool TextClass::KeyInput(ID3D11DeviceContext* deviceContext, const char input) const
 {
-    const char tp[16] = {input, };
+    const char tp[16] = {input,};
 
     if (!UpdateSentence(m_key, tp, 20, 60, 1.0f, 0.0f, 0.0f, deviceContext))
         return false;
