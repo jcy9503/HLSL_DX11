@@ -24,6 +24,10 @@ bool SoundClass::Initialize(const HWND hwnd)
     if (!LoadWaveFile(filename, &m_secondaryBuffer))
         return false;
 
+    constexpr char musicname[] = "../HLSL_DX11/Demo14/music.wav";
+    if (!LoadWaveFile(musicname, &m_thirdBuffer))
+        return false;
+
     return PlayWaveFile();
 }
 
@@ -33,7 +37,7 @@ void SoundClass::Shutdown()
     ShutdownDirectSound();
 }
 
-bool SoundClass::InitializeDirectSound(HWND hwnd)
+bool SoundClass::InitializeDirectSound(const HWND hwnd)
 {
     // 기본 사운드 디바이스에 쓰일 다이렉트 사운드 인터페이스 포인터 초기화
     HRESULT result = DirectSoundCreate8(nullptr, &m_directSound, nullptr);
@@ -88,7 +92,7 @@ void SoundClass::ShutdownDirectSound()
     }
 }
 
-bool SoundClass::LoadWaveFile(const char* filename, IDirectSoundBuffer8** secondaryBuffer) const
+bool SoundClass::LoadWaveFile(const char* filename, IDirectSoundBuffer8** waveBuffer) const
 {
     FILE* filePtr = nullptr;
     int error = fopen_s(&filePtr, filename, "rb");
@@ -150,7 +154,7 @@ bool SoundClass::LoadWaveFile(const char* filename, IDirectSoundBuffer8** second
     if (FAILED(result)) return false;
 
     // 다이렉트 사운드 8 인터페이스에 버퍼 포맷이 적합한지 테스트 후 부 사운드 버퍼 생성
-    result = tempBuffer->QueryInterface(IID_IDirectSoundBuffer8, reinterpret_cast<void**>(&*secondaryBuffer));
+    result = tempBuffer->QueryInterface(IID_IDirectSoundBuffer8, reinterpret_cast<void**>(&*waveBuffer));
     if (FAILED(result)) return false;
 
     tempBuffer->Release();
@@ -172,13 +176,13 @@ bool SoundClass::LoadWaveFile(const char* filename, IDirectSoundBuffer8** second
 
     unsigned char* bufferPtr = nullptr;
     unsigned long bufferSize = 0;
-    result = (*secondaryBuffer)->Lock(0, waveFileHeader.dataSize, reinterpret_cast<void**>(&bufferPtr), static_cast<DWORD*>(&bufferSize),
+    result = (*waveBuffer)->Lock(0, waveFileHeader.dataSize, reinterpret_cast<void**>(&bufferPtr), static_cast<DWORD*>(&bufferSize),
         nullptr, nullptr, 0);
     if (FAILED(result)) return false;
 
     memcpy(bufferPtr, waveData, waveFileHeader.dataSize);
 
-    result = (*secondaryBuffer)->Unlock(reinterpret_cast<void*>(bufferPtr), bufferSize, nullptr, 0);
+    result = (*waveBuffer)->Unlock(reinterpret_cast<void*>(bufferPtr), bufferSize, nullptr, 0);
     if (FAILED(result)) return false;
 
     delete[] waveData;
@@ -204,7 +208,16 @@ bool SoundClass::PlayWaveFile() const
     result = m_secondaryBuffer->SetVolume(DSBVOLUME_MAX);
     if (FAILED(result)) return false;
 
-    result = m_secondaryBuffer->Play(0, 0, 0);
+    result = m_secondaryBuffer->Play(0, 0, DSBPLAY_LOOPING);
+    if (FAILED(result)) return false;
+
+    result = m_thirdBuffer->SetCurrentPosition(0);
+    if (FAILED(result)) return false;
+
+    result = m_thirdBuffer->SetVolume(DSBVOLUME_MAX);
+    if (FAILED(result)) return false;
+
+    result = m_thirdBuffer->Play(0, 0, 0);
     if (FAILED(result)) return false;
 
     return true;

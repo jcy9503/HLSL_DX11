@@ -147,7 +147,7 @@ void GraphicsClass::Shutdown()
     // }
 }
 
-bool GraphicsClass::Frame(const int mouseX, const int mouseY) const
+bool GraphicsClass::Frame(const int mouseX, const int mouseY, int fps, int cpu, float frameTime) const
 {
     // static float rotation = 0.0f;
     //
@@ -156,10 +156,16 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY) const
     //
     // return Render(rotation);
 
-    if (!m_text->SetMousePosition(mouseX, mouseY, m_direct3D->GetDeviceContext()))
+    // if (!m_text->SetMousePosition(mouseX, mouseY, m_direct3D->GetDeviceContext()))
+    //     return false;
+    //
+    // if(!m_bitmap->SetMousePosition(m_direct3D->GetDeviceContext(), mouseX, mouseY))
+    //     return false;
+
+    if (!m_text->SetFps(m_direct3D->GetDeviceContext(), fps))
         return false;
 
-    if(!m_bitmap->SetMousePosition(m_direct3D->GetDeviceContext(), mouseX, mouseY))
+    if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
         return false;
 
     return true;
@@ -190,7 +196,7 @@ bool GraphicsClass::Render() const
     m_bitmap->Render(m_direct3D->GetDeviceContext());
     if (!m_textureShader->Render(m_direct3D->GetDeviceContext(), m_bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
         m_bitmap->GetTexture()))
-            return false;
+        return false;
 
     // 텍스트 문자열 렌더링
     if (!m_text->Render(m_direct3D->GetDeviceContext(), worldMatrix, orthoMatrix))
@@ -226,7 +232,7 @@ bool GraphicsClass::Render() const
 
 bool GraphicsClass::InputKey(const char input) const
 {
-    if(!m_text->KeyInput(m_direct3D->GetDeviceContext(), input))
+    if (!m_text->KeyInput(m_direct3D->GetDeviceContext(), input))
         return false;
 
     return true;

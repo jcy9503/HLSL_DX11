@@ -349,3 +349,54 @@ bool TextClass::KeyInput(ID3D11DeviceContext* deviceContext, const char input) c
 
     return true;
 }
+
+bool TextClass::SetFps(ID3D11DeviceContext* deviceContext, int fps) const
+{
+    // FPS를 10000 미만으로 자름
+    if (fps > 9999) fps = 9999;
+
+    char tpStr[16] = {0,};
+    _itoa_s(fps, tpStr, 10);
+
+    char fpsStr[16] = {0,};
+    strcpy_s(fpsStr, "FPS: ");
+    strcat_s(fpsStr, tpStr);
+
+    float red = 0;
+    float green = 0;
+    float blue = 0;
+
+    if (fps >= 60)
+    {
+        red = 0.0f;
+        green = 1.0f;
+        blue = 0.0f;
+    }
+    else if (fps >= 30)
+    {
+        red = 1.0f;
+        green = 1.0f;
+        blue = 0.0f;
+    }
+    else
+    {
+        red = 1.0f;
+        green = 0.0f;
+        blue = 0.0f;
+    }
+
+    return UpdateSentence(m_sentence1, fpsStr, 20, 20, red, green, blue, deviceContext);
+}
+
+bool TextClass::SetCpu(ID3D11DeviceContext* deviceContext, const int cpu) const
+{
+    char tpStr[16] = {0,};
+    _itoa_s(cpu, tpStr, 10);
+
+    char cpuStr[16] = {0,};
+    strcpy_s(cpuStr, "CPU: ");
+    strcat_s(cpuStr, tpStr);
+    strcat_s(cpuStr, "%");
+
+    return UpdateSentence(m_sentence2, cpuStr, 20, 40, 0.0f, 1.0f, 0.0f, deviceContext);
+}

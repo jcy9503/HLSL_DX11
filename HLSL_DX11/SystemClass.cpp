@@ -2,6 +2,9 @@
 #include "InputClass.h"
 #include "graphicsclass.h"
 #include "SoundClass.h"
+#include "FPSClass.h"
+#include "CPUClass.h"
+#include "TimerClass.h"
 #include "SystemClass.h"
 
 SystemClass::SystemClass()
@@ -49,6 +52,25 @@ bool SystemClass::Initialize()
         return false;
     }
 
+    // m_fps : 프레임 클래스
+    m_fps = new FpsClass;
+    if (!m_fps) return false;
+    m_fps->Initialize();
+
+    // m_cpu : CPU 사용률 관련 클래스
+    m_cpu = new CpuClass;
+    if (!m_cpu) return false;
+    m_cpu->Initialize();
+
+    // m_timer : 타이머 클래스
+    m_timer = new TimerClass;
+    if (!m_timer) return false;
+    if (!m_timer->Initialize())
+    {
+        MessageBox(m_hwnd, L"Could not initialize the timer object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
     return true;
 }
 
@@ -73,6 +95,25 @@ void SystemClass::Shutdown()
         m_sound->Shutdown();
         delete m_sound;
         m_sound = nullptr;
+    }
+
+    if (m_fps)
+    {
+        delete m_fps;
+        m_fps = nullptr;
+    }
+
+    if (m_cpu)
+    {
+        m_cpu->Shutdown();
+        delete m_cpu;
+        m_cpu = nullptr;
+    }
+
+    if (m_timer)
+    {
+        delete m_timer;
+        m_timer = nullptr;
     }
 
     ShutdownWindows();
@@ -120,15 +161,19 @@ bool SystemClass::Frame() const
 
     m_input->GetMouseLocation(mouseX, mouseY);
 
-    if (!m_graphics->Frame(mouseX, mouseY))
-        return false;
-
     const char inputKey = m_input->ReturnKey();
     if (inputKey != -1)
     {
         // printf("%c", inputKey);
         m_graphics->InputKey(inputKey);
     }
+
+    m_timer->Frame();
+    m_fps->Frame();
+    m_cpu->Frame();
+
+    if (!m_graphics->Frame(mouseX, mouseY, m_fps->GetFps(), m_cpu->GetCpuPercentage(), m_timer->GetTime()))
+        return false;
 
     return m_graphics->Render();
 }

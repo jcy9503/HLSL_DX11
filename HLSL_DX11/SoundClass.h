@@ -1,5 +1,9 @@
 #pragma once
 
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
+
 struct IDirectSound;
 struct IDirectSound8;
 struct IDirectSoundBuffer;
@@ -46,4 +50,5 @@ private:
     IDirectSound8* m_directSound = nullptr;
     IDirectSoundBuffer* m_primaryBuffer = nullptr;
     IDirectSoundBuffer8* m_secondaryBuffer = nullptr;
+    IDirectSoundBuffer8* m_thirdBuffer = nullptr;
 };

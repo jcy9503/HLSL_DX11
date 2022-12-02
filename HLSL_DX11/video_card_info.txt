@@ -1,0 +1,4 @@
+Video Card Name:		NVIDIA GeForce RTX 3090
+Video Card Memory:	24340MB
+Numerator:			120000
+Denominator:		1000
