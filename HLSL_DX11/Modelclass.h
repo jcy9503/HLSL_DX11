@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class TextureClass;
+class TextureArrayClass;
 
 class ModelClass : public AlignedAllocationPolicy<16>
 {
@@ -9,7 +9,7 @@ private:
     {
         XMFLOAT3 position;
         XMFLOAT2 texture;
-        XMFLOAT3 normal;
+        //XMFLOAT3 normal;
     };
 
     struct ModelType
@@ -24,19 +24,19 @@ public:
     ModelClass(const ModelClass&);
     ~ModelClass();
 
-    bool Initialize(ID3D11Device*, const char*, WCHAR*);
+    bool Initialize(ID3D11Device*, const char*, WCHAR*, WCHAR*);
     void Shutdown();
     void Render(ID3D11DeviceContext*) const;
     
     int GetIndexCount() const;
-    ID3D11ShaderResourceView* GetTexture() const;
+    ID3D11ShaderResourceView** GetTextureArray() const;
 
 private:
     bool InitializeBuffers(ID3D11Device*);
     void ShutdownBuffers();
     void RenderBuffers(ID3D11DeviceContext*) const;
 
-    bool LoadTexture(ID3D11Device*, WCHAR*);
+    bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
     void ReleaseTexture();
 
     bool LoadModel(const char*);
@@ -47,6 +47,6 @@ private:
     ID3D11Buffer* m_indexBuffer = nullptr;
     int m_vertexCount = 0;
     int m_indexCount = 0;
-    TextureClass* m_texture = nullptr;
+    TextureArrayClass* m_textureArray = nullptr;
     ModelType* m_model = nullptr;
 };

@@ -9,6 +9,7 @@ class D3DClass;
 class CameraClass;
 class TextClass;
 class TextureShaderClass;
+class MultiTextureShaderClass;
 class BitmapClass;
 class ModelClass;
 class ModelListClass;
@@ -40,4 +41,5 @@ private:
     LightClass* m_light = nullptr;
     LightShaderClass* m_lightShader = nullptr;
     FrustumClass* m_frustum = nullptr;
+    MultiTextureShaderClass* m_multiTextureShader = nullptr;
 };

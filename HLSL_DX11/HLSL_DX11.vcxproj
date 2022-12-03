@@ -172,11 +172,13 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Modelclass.cpp" />
     <ClCompile Include="ModelListClass.cpp" />
+    <ClCompile Include="MultiTextureShaderClass.cpp" />
     <ClCompile Include="PositionClass.cpp" />
     <ClCompile Include="SoundClass.cpp" />
     <ClCompile Include="Stdafx.cpp" />
     <ClCompile Include="SystemClass.cpp" />
     <ClCompile Include="TextClass.cpp" />
+    <ClCompile Include="TextureArrayClass.cpp" />
     <ClCompile Include="TextureClass.cpp" />
     <ClCompile Include="TextureShaderClass.cpp" />
     <ClCompile Include="TimerClass.cpp" />
@@ -200,12 +202,14 @@
     <ClInclude Include="LightShaderClass.h" />
     <ClInclude Include="Modelclass.h" />
     <ClInclude Include="ModelListClass.h" />
+    <ClInclude Include="MultiTextureShaderClass.h" />
     <ClInclude Include="PositionClass.h" />
     <ClInclude Include="SoundClass.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="SystemClass.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TextClass.h" />
+    <ClInclude Include="TextureArrayClass.h" />
     <ClInclude Include="TextureClass.h" />
     <ClInclude Include="TextureShaderClass.h" />
     <ClInclude Include="TimerClass.h" />
@@ -231,6 +235,9 @@
     <Content Include="Demo16\sample.dds" />
     <Content Include="Demo16\sample.txt" />
     <Content Include="Demo16\sphere.txt" />
+    <Content Include="Demo17\dirt01.dds" />
+    <Content Include="Demo17\square.txt" />
+    <Content Include="Demo17\stone01.dds" />
     <Content Include="FontData\font.dds" />
     <Content Include="FontData\Font.ps" />
     <Content Include="FontData\Font.vs" />
@@ -239,6 +246,9 @@
     <Content Include="LightShader\DirLight.vs" />
     <Content Include="LightShader\PointLight.ps" />
     <Content Include="LightShader\PointLight.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MultiTextureShader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,5 @@
 ﻿#include "Stdafx.h"
-#include "TextureClass.h"
+#include "TextureArrayClass.h"
 #include "Modelclass.h"
 
 #include <fstream>
@@ -15,12 +15,12 @@ ModelClass::ModelClass(const ModelClass& other)
 ModelClass::~ModelClass()
 = default;
 
-bool ModelClass::Initialize(ID3D11Device* device, const char* modelFilename, WCHAR* textureFilename)
+bool ModelClass::Initialize(ID3D11Device* device, const char* modelFilename, WCHAR* textureFilename1, WCHAR* textureFilename2)
 {
     if(!LoadModel(modelFilename)) return false;
     if(!InitializeBuffers(device)) return false;
 
-    return LoadTexture(device, textureFilename);
+    return LoadTextures(device, textureFilename1, textureFilename2);
 }
 
 void ModelClass::Shutdown()
@@ -43,9 +43,9 @@ int ModelClass::GetIndexCount() const
     return m_indexCount;
 }
 
-ID3D11ShaderResourceView* ModelClass::GetTexture() const
+ID3D11ShaderResourceView** ModelClass::GetTextureArray() const
 {
-    return m_texture->GetTexture();
+    return m_textureArray->GetTextureArray();
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
@@ -60,7 +60,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
     {
         vertices[i].position    = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
         vertices[i].texture     = XMFLOAT2(m_model[i].tu, m_model[i].tv);
-        vertices[i].normal      = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+        //vertices[i].normal      = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
         indices[i] = i;
     }
 
@@ -130,21 +130,21 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext) const
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+bool ModelClass::LoadTextures(ID3D11Device* device, WCHAR* filename1, WCHAR* filename2)
 {
-    m_texture = new TextureClass;
-    if(!m_texture) return false;
+    m_textureArray = new TextureArrayClass;
+    if(!m_textureArray) return false;
     
-    return m_texture->Initialize(device, filename);
+    return m_textureArray->Initialize(device, filename1, filename2);
 }
 
 void ModelClass::ReleaseTexture()
 {
-    if(m_texture)
+    if(m_textureArray)
     {
-        m_texture->Shutdown();
-        delete m_texture;
-        m_texture = nullptr;
+        m_textureArray->Shutdown();
+        delete m_textureArray;
+        m_textureArray = nullptr;
     }
 }
 
