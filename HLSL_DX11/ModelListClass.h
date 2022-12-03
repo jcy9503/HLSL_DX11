@@ -1,5 +1,7 @@
 #pragma once
 
+#define DIVISION 10000
+
 class ModelListClass
 {
 private:

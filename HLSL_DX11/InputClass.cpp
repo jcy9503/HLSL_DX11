@@ -145,7 +145,7 @@ bool InputClass::IsEscapePressed() const
 
 bool InputClass::IsLeftArrowPressed() const
 {
-    if(m_keyboardState[DIK_LEFT] & 0x80)
+    if(m_keyboardState[DIK_LEFT] & 0x80 || m_keyboardState[DIK_A] & 0x80)
         return true;
     
     return false;
@@ -153,7 +153,7 @@ bool InputClass::IsLeftArrowPressed() const
 
 bool InputClass::IsRightArrowPressed() const
 {
-    if(m_keyboardState[DIK_RIGHT] * 0x80)
+    if(m_keyboardState[DIK_RIGHT] * 0x80 || m_keyboardState[DIK_D] & 0x80)
         return true;
 
     return false;

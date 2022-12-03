@@ -17,13 +17,20 @@ private:
         float padding;
     };
 
-    struct LightBufferType
+    struct DirLightBufferType
+    {
+        XMFLOAT4 diffuseColor;
+        XMFLOAT3 lightDirection;
+        float padding;
+    };
+
+    struct AmbientLightBufferType
     {
         XMFLOAT4 ambientColor;
         XMFLOAT4 diffuseColor;
         XMFLOAT3 lightDirection;
-        float specularPower;
         XMFLOAT4 specularColor;
+        float specularPower;
     };
 
 public:

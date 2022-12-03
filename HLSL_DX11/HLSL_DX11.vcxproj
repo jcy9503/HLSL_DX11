@@ -230,6 +230,7 @@
     <Content Include="Demo10\Light.vs" />
     <Content Include="Demo16\sample.dds" />
     <Content Include="Demo16\sample.txt" />
+    <Content Include="Demo16\sphere.txt" />
     <Content Include="FontData\font.dds" />
     <Content Include="FontData\Font.ps" />
     <Content Include="FontData\Font.vs" />

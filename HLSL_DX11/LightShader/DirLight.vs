@@ -37,7 +37,7 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 PixelInputType LightVertexShader(VertexInputType input)
 {
-    PixelInputType output;
+    PixelInputType output = (PixelInputType)0;
     
 
     input.position.w = 1.0f;

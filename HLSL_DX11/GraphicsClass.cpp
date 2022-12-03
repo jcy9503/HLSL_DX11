@@ -35,7 +35,7 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     if (!m_camera) return false;
     m_camera->SetPosition(0.0f, 0.0f, -1.0f);
 
-    XMMATRIX baseViewMatrix;
+    XMMATRIX baseViewMatrix{};
     m_camera->Render();
     m_camera->GetViewMatrix(baseViewMatrix);
 
@@ -64,7 +64,7 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         return false;
     }
 
-    const char model[] = "../HLSL_DX11/Demo16/sphere.txt";
+    constexpr char model[] = "../HLSL_DX11/Demo16/sphere.txt";
     WCHAR tex[] = L"../HLSL_DX11/Demo16/sample.dds";
     m_model = new ModelClass;
     if (!m_model) return false;
@@ -76,7 +76,7 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
 
     m_lightShader = new LightShaderClass;
     if (!m_lightShader) return false;
-    if (!m_lightShader->Initialize(m_direct3D->GetDevice(), hwnd, 1))
+    if (!m_lightShader->Initialize(m_direct3D->GetDevice(), hwnd, 0))
     {
         MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
@@ -117,11 +117,6 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     // m_light = new LightClass;
     // if (!m_light) return false;
     //
-    // m_light->SetAmbientColor(0.15f, 0.15f, 0.0f, 1.0f);
-    // m_light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-    // m_light->SetDirection(1.0f, 0.0f, 1.0f);
-    // m_light->SetSpecularcolor(1.0f, 1.0f, 1.0f, 1.0f);
-    // m_light->SetSpecularPower(32.0f);
 
     return true;
 }
@@ -195,7 +190,7 @@ void GraphicsClass::Shutdown()
     }
 }
 
-bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, const int cpu, float frameTime, float rotationY) const
+bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, const int cpu, float frameTime, const float rotationY) const
 {
     // static float rotation = 0.0f;
     //
@@ -212,7 +207,7 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, con
 
     if (!m_text->SetFps(m_direct3D->GetDeviceContext(), fps))
         return false;
-    
+
     if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
         return false;
 
@@ -230,8 +225,10 @@ bool GraphicsClass::Render() const
     // 카메라의 위치에 따라 뷰 행렬 생성
     m_camera->Render();
 
-    // 카메라 및 D3D 객체에서 월드, 뷰, 투영 행렬 획득
-    XMMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
+    XMMATRIX worldMatrix{};
+    XMMATRIX viewMatrix{};
+    XMMATRIX projectionMatrix{};
+    XMMATRIX orthoMatrix{};
 
     m_camera->GetViewMatrix(viewMatrix);
     m_direct3D->GetWorldMatrix(worldMatrix);
@@ -241,10 +238,18 @@ bool GraphicsClass::Render() const
     float positionX = 0.0f;
     float positionY = 0.0f;
     float positionZ = 0.0f;
-    XMFLOAT4 color;
+    XMFLOAT4 color{};
+
+    m_light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+    m_light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+    m_light->SetDirection(1.0f, -0.5f, 0.5f);
+    m_light->SetSpecularcolor(1.0f, 1.0f, 1.0f, 1.0f);
+    m_light->SetSpecularPower(16.0f);
 
     m_frustum->ConstructFrustum(SCREEN_DEPTH, projectionMatrix, viewMatrix);
+
     const int modelCount = m_modelList->GetModelCount();
+
     int renderCount = 0;
 
     for (int index = 0; index < modelCount; ++index)
@@ -252,20 +257,23 @@ bool GraphicsClass::Render() const
         constexpr float radius = 1.0f;
         m_modelList->GetData(index, positionX, positionY, positionZ, color);
 
-        if (m_frustum->CheckSphere(positionX, positionY, positionZ, radius))
+        if (m_frustum->CheckCube(positionX, positionY, positionZ, radius))
         {
             worldMatrix = XMMatrixTranslation(positionX, positionY, positionZ);
+
             m_model->Render(m_direct3D->GetDeviceContext());
+
             m_lightShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-                m_model->GetTexture(), m_light->GetDirection(), XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), color, XMFLOAT3(0.0f, 0.0f, 0.0f),
-                XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), 0);
+                m_model->GetTexture(), m_light->GetDirection(), m_light->GetAmbientColor(), color,
+                m_camera->GetPosition(), m_light->GetSpecularColor(), m_light->GetSpecularPower());
+
             m_direct3D->GetWorldMatrix(worldMatrix);
 
             ++renderCount;
         }
     }
 
-    if(!m_text->SetRenderCount(m_direct3D->GetDeviceContext(), renderCount))
+    if (!m_text->SetRenderCount(m_direct3D->GetDeviceContext(), renderCount))
         return false;
 
     // 2D 렌더링을 위해 Z Buffer 끄기
