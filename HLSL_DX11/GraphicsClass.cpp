@@ -11,6 +11,7 @@
 #include "FrustumClass.h"
 #include "LightMapShaderClass.h"
 #include "MultiTextureShaderClass.h"
+#include "AlphaMapShaderClass.h"
 #include "GraphicsClass.h"
 
 GraphicsClass::GraphicsClass()
@@ -66,24 +67,33 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         return false;
     }
 
-    constexpr char model[] = "../HLSL_DX11/LightmapShader/square.txt";
-    WCHAR tex1[] = L"../HLSL_DX11/LightmapShader/stone01.dds";
-    WCHAR tex2[] = L"../HLSL_DX11/LightmapShader/light01.dds";
+    constexpr char model[] = "../HLSL_DX11/AlphamapShader/square.txt";
+    WCHAR tex1[] = L"../HLSL_DX11/AlphamapShader/stone01.dds";
+    WCHAR tex2[] = L"../HLSL_DX11/AlphamapShader/dirt01.dds";
+    WCHAR tex3[] = L"../HLSL_DX11/AlphamapShader/alpha02.dds";
     m_model = new ModelClass;
     if (!m_model) return false;
-    if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1, tex2))
+    if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1, tex2, tex3))
     {
         MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
-    m_lightMapShader = new LightMapShaderClass;
-    if (!m_lightMapShader) return false;
-    if (!m_lightMapShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    m_alphaMapShader = new AlphaMapShaderClass;
+    if (!m_alphaMapShader) return false;
+    if (!m_alphaMapShader->Initialize(m_direct3D->GetDevice(), hwnd))
     {
-        MessageBox(hwnd, L"Coult not initialize the light map shader object.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(hwnd, L"Could not initialize the alpha map shader object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
+
+    // m_lightMapShader = new LightMapShaderClass;
+    // if (!m_lightMapShader) return false;
+    // if (!m_lightMapShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    // {
+    //     MessageBox(hwnd, L"Coult not initialize the light map shader object.", L"Error", MB_OK | MB_ICONERROR);
+    //     return false;
+    // }
 
     // m_multiTextureShader = new MultiTextureShaderClass;
     // if (!m_multiTextureShader) return false;
@@ -215,11 +225,18 @@ void GraphicsClass::Shutdown()
     //     m_multiTextureShader = nullptr;
     // }
 
-    if (m_lightMapShader)
+    // if (m_lightMapShader)
+    // {
+    //     m_lightMapShader->Shutdown();
+    //     delete m_lightMapShader;
+    //     m_lightMapShader = nullptr;
+    // }
+
+    if (m_alphaMapShader)
     {
-        m_lightMapShader->Shutdown();
-        delete m_lightMapShader;
-        m_lightMapShader = nullptr;
+        m_alphaMapShader->Shutdown();
+        delete m_alphaMapShader;
+        m_alphaMapShader = nullptr;
     }
 }
 
@@ -314,7 +331,10 @@ bool GraphicsClass::Render() const
     // m_multiTextureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
     //     m_model->GetTextureArray());
 
-    m_lightMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+    // m_lightMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+    //     m_model->GetTextureArray());
+
+    m_alphaMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
         m_model->GetTextureArray());
 
     // 2D ·»´õ¸µÀ» À§ÇØ Z Buffer ²ô±â

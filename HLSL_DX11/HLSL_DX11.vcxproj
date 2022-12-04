@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AlphaMapShaderClass.cpp" />
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="Cameraclass.cpp" />
     <ClCompile Include="Colorshaderclass.cpp" />
@@ -186,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AlignedAllocationPolicy.h" />
+    <ClInclude Include="AlphaMapShaderClass.h" />
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="Cameraclass.h" />
     <ClInclude Include="Colorshaderclass.h" />
@@ -217,8 +219,8 @@
     <ClInclude Include="TimerClass.h" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LightmapShader\Lightmap.ps" />
-    <Content Include="LightmapShader\Lightmap.vs" />
+    <Content Include="AlphamapShader\Alphamap.ps" />
+    <Content Include="AlphamapShader\Alphamap.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
