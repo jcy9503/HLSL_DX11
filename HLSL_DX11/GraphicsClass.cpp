@@ -9,6 +9,7 @@
 #include "LightClass.h"
 #include "LightShaderClass.h"
 #include "FrustumClass.h"
+#include "LightMapShaderClass.h"
 #include "MultiTextureShaderClass.h"
 #include "GraphicsClass.h"
 
@@ -65,9 +66,9 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         return false;
     }
 
-    constexpr char model[] = "../HLSL_DX11/Demo17/square.txt";
-    WCHAR tex1[] = L"../HLSL_DX11/Demo17/stone01.dds";
-    WCHAR tex2[] = L"../HLSL_DX11/Demo17/dirt01.dds";
+    constexpr char model[] = "../HLSL_DX11/LightmapShader/square.txt";
+    WCHAR tex1[] = L"../HLSL_DX11/LightmapShader/stone01.dds";
+    WCHAR tex2[] = L"../HLSL_DX11/LightmapShader/light01.dds";
     m_model = new ModelClass;
     if (!m_model) return false;
     if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1, tex2))
@@ -76,13 +77,21 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         return false;
     }
 
-    m_multiTextureShader = new MultiTextureShaderClass;
-    if (!m_multiTextureShader) return false;
-    if (!m_multiTextureShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    m_lightMapShader = new LightMapShaderClass;
+    if (!m_lightMapShader) return false;
+    if (!m_lightMapShader->Initialize(m_direct3D->GetDevice(), hwnd))
     {
-        MessageBox(hwnd, L"Could not initialize the multi-texture shader object.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(hwnd, L"Coult not initialize the light map shader object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
+
+    // m_multiTextureShader = new MultiTextureShaderClass;
+    // if (!m_multiTextureShader) return false;
+    // if (!m_multiTextureShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    // {
+    //     MessageBox(hwnd, L"Could not initialize the multi-texture shader object.", L"Error", MB_OK | MB_ICONERROR);
+    //     return false;
+    // }
 
     // m_lightShader = new LightShaderClass;
     // if (!m_lightShader) return false;
@@ -199,11 +208,18 @@ void GraphicsClass::Shutdown()
     //     m_frustum = nullptr;
     // }
 
-    if (m_multiTextureShader)
+    // if (m_multiTextureShader)
+    // {
+    //     m_multiTextureShader->Shutdown();
+    //     delete m_multiTextureShader;
+    //     m_multiTextureShader = nullptr;
+    // }
+
+    if (m_lightMapShader)
     {
-        m_multiTextureShader->Shutdown();
-        delete m_multiTextureShader;
-        m_multiTextureShader = nullptr;
+        m_lightMapShader->Shutdown();
+        delete m_lightMapShader;
+        m_lightMapShader = nullptr;
     }
 }
 
@@ -228,7 +244,7 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, con
     if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
         return false;
 
-    m_camera->SetPosition(0.0f, 0.0f, -10.0f);
+    m_camera->SetPosition(0.0f, 0.0f, -3.0f);
     m_camera->SetRotation(0.0f, rotationY, 0.0f);
 
     return true;
@@ -295,7 +311,10 @@ bool GraphicsClass::Render() const
 
     m_model->Render(m_direct3D->GetDeviceContext());
 
-    m_multiTextureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+    // m_multiTextureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+    //     m_model->GetTextureArray());
+
+    m_lightMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
         m_model->GetTextureArray());
 
     // 2D ·»´õ¸µÀ» À§ÇØ Z Buffer ²ô±â

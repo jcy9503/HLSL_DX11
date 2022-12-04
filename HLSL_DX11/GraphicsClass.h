@@ -15,6 +15,7 @@ class ModelClass;
 class ModelListClass;
 class LightClass;
 class LightShaderClass;
+class LightMapShaderClass;
 class FrustumClass;
 
 class GraphicsClass
@@ -42,4 +43,5 @@ private:
     LightShaderClass* m_lightShader = nullptr;
     FrustumClass* m_frustum = nullptr;
     MultiTextureShaderClass* m_multiTextureShader = nullptr;
+    LightMapShaderClass* m_lightMapShader = nullptr;
 };

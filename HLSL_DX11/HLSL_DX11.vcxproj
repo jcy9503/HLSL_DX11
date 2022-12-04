@@ -168,6 +168,7 @@
     <ClCompile Include="HLSL_DX11.cpp" />
     <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="LightClass.cpp" />
+    <ClCompile Include="LightMapShaderClass.cpp" />
     <ClCompile Include="LightShaderClass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Modelclass.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="GraphicsClass.h" />
     <ClInclude Include="InputClass.h" />
     <ClInclude Include="LightClass.h" />
+    <ClInclude Include="LightMapShaderClass.h" />
     <ClInclude Include="LightShaderClass.h" />
     <ClInclude Include="Modelclass.h" />
     <ClInclude Include="ModelListClass.h" />
@@ -215,40 +217,8 @@
     <ClInclude Include="TimerClass.h" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Demo04\Color.ps" />
-    <Content Include="Demo04\Color.vs" />
-    <Content Include="Demo05\sample.tga" />
-    <Content Include="Demo05\sf.ps" />
-    <Content Include="Demo05\Texture.ps" />
-    <Content Include="Demo05\Texture.vs" />
-    <Content Include="Demo06\Light.ps" />
-    <Content Include="Demo06\Light.vs" />
-    <Content Include="Demo06\sample.dds" />
-    <Content Include="Demo07\cube.txt" />
-    <Content Include="Demo07\sample.dds" />
-    <Content Include="Demo08\cube.obj" />
-    <Content Include="Demo08\model.txt" />
-    <Content Include="Demo09\Light.ps" />
-    <Content Include="Demo09\Light.vs" />
-    <Content Include="Demo10\Light.ps" />
-    <Content Include="Demo10\Light.vs" />
-    <Content Include="Demo16\sample.dds" />
-    <Content Include="Demo16\sample.txt" />
-    <Content Include="Demo16\sphere.txt" />
-    <Content Include="Demo17\dirt01.dds" />
-    <Content Include="Demo17\square.txt" />
-    <Content Include="Demo17\stone01.dds" />
-    <Content Include="FontData\font.dds" />
-    <Content Include="FontData\Font.ps" />
-    <Content Include="FontData\Font.vs" />
-    <Content Include="FontData\fontdata.txt" />
-    <Content Include="LightShader\DirLight.ps" />
-    <Content Include="LightShader\DirLight.vs" />
-    <Content Include="LightShader\PointLight.ps" />
-    <Content Include="LightShader\PointLight.vs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MultiTextureShader" />
+    <Content Include="LightmapShader\Lightmap.ps" />
+    <Content Include="LightmapShader\Lightmap.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
