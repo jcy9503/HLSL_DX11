@@ -4,13 +4,14 @@
 #include "TextClass.h"
 #include "BitmapClass.h"
 #include "TextureShaderClass.h"
-#include "Modelclass.h"
+#include "ModelClass.h"
 #include "ModelListClass.h"
 #include "LightClass.h"
 #include "LightShaderClass.h"
 #include "FrustumClass.h"
 #include "LightMapShaderClass.h"
 #include "MultiTextureShaderClass.h"
+#include "BumpmapShaderClass.h"
 #include "AlphaMapShaderClass.h"
 #include "GraphicsClass.h"
 
@@ -36,7 +37,7 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
 
     m_camera = new CameraClass;
     if (!m_camera) return false;
-    m_camera->SetPosition(0.0f, 0.0f, -1.0f);
+    m_camera->SetPosition(0.0f, 0.0f, -5.0f);
 
     XMMATRIX baseViewMatrix{};
     m_camera->Render();
@@ -50,42 +51,49 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
         return false;
     }
 
-    m_textureShader = new TextureShaderClass;
-    if (!m_textureShader) return false;
-    if (!m_textureShader->Initialize(m_direct3D->GetDevice(), hwnd))
-    {
-        MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    // m_textureShader = new TextureShaderClass;
+    // if (!m_textureShader) return false;
+    // if (!m_textureShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    // {
+    //     MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK | MB_ICONERROR);
+    //     return false;
+    // }
 
-    WCHAR cursor[] = L"../HLSL_DX11/Demo10/sample.dds";
-    m_bitmap = new BitmapClass;
-    if (!m_bitmap) return false;
-    if (!m_bitmap->Initialize(m_direct3D->GetDevice(), screenWidth, screenHeight, cursor, 50, 50))
-    {
-        MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    // WCHAR cursor[] = L"../HLSL_DX11/Demo10/sample.dds";
+    // m_bitmap = new BitmapClass;
+    // if (!m_bitmap) return false;
+    // if (!m_bitmap->Initialize(m_direct3D->GetDevice(), screenWidth, screenHeight, cursor, 50, 50))
+    // {
+    //     MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK | MB_ICONERROR);
+    //     return false;
+    // }
 
-    constexpr char model[] = "../HLSL_DX11/AlphamapShader/square.txt";
-    WCHAR tex1[] = L"../HLSL_DX11/AlphamapShader/stone01.dds";
-    WCHAR tex2[] = L"../HLSL_DX11/AlphamapShader/dirt01.dds";
-    WCHAR tex3[] = L"../HLSL_DX11/AlphamapShader/alpha02.dds";
+    constexpr char model[] = "../HLSL_DX11/BumpmapShader/cube.txt";
+    WCHAR tex1[] = L"../HLSL_DX11/BumpmapShader/stone01.dds";
+    WCHAR tex2[] = L"../HLSL_DX11/BumpmapShader/bump01.dds";
     m_model = new ModelClass;
     if (!m_model) return false;
-    if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1, tex2, tex3))
+    if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1, tex2))
     {
         MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
-    m_alphaMapShader = new AlphaMapShaderClass;
-    if (!m_alphaMapShader) return false;
-    if (!m_alphaMapShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    m_bumpmapShader = new BumpmapShaderClass;
+    if (!m_bumpmapShader) return false;
+    if (!m_bumpmapShader->Initialize(m_direct3D->GetDevice(), hwnd))
     {
-        MessageBox(hwnd, L"Could not initialize the alpha map shader object.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(hwnd, L"Could not initialize the bumpmap shader object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
+
+    // m_alphaMapShader = new AlphaMapShaderClass;
+    // if (!m_alphaMapShader) return false;
+    // if (!m_alphaMapShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    // {
+    //     MessageBox(hwnd, L"Could not initialize the alpha map shader object.", L"Error", MB_OK | MB_ICONERROR);
+    //     return false;
+    // }
 
     // m_lightMapShader = new LightMapShaderClass;
     // if (!m_lightMapShader) return false;
@@ -143,9 +151,10 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     //     return false;
     // }
     //
-    // m_light = new LightClass;
-    // if (!m_light) return false;
-    //
+    m_light = new LightClass;
+    if (!m_light) return false;
+    m_light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+    m_light->SetDirection(0.0f, 0.0f, 1.0f);
 
     return true;
 }
@@ -192,51 +201,58 @@ void GraphicsClass::Shutdown()
         m_model = nullptr;
     }
 
-    // if (m_modelList)
-    // {
-    //     m_modelList->Shutdown();
-    //     delete m_modelList;
-    //     m_modelList = nullptr;
-    // }
-    //
-    // if (m_light)
-    // {
-    //     delete m_light;
-    //     m_light = nullptr;
-    // }
-    //
-    // if (m_lightShader)
-    // {
-    //     m_lightShader->Shutdown();
-    //     delete m_lightShader;
-    //     m_lightShader = nullptr;
-    // }
-    //
-    // if (m_frustum)
-    // {
-    //     delete m_frustum;
-    //     m_frustum = nullptr;
-    // }
+    if (m_modelList)
+    {
+        m_modelList->Shutdown();
+        delete m_modelList;
+        m_modelList = nullptr;
+    }
+    
+    if (m_light)
+    {
+        delete m_light;
+        m_light = nullptr;
+    }
+    
+    if (m_lightShader)
+    {
+        m_lightShader->Shutdown();
+        delete m_lightShader;
+        m_lightShader = nullptr;
+    }
+    
+    if (m_frustum)
+    {
+        delete m_frustum;
+        m_frustum = nullptr;
+    }
 
-    // if (m_multiTextureShader)
-    // {
-    //     m_multiTextureShader->Shutdown();
-    //     delete m_multiTextureShader;
-    //     m_multiTextureShader = nullptr;
-    // }
+    if (m_multiTextureShader)
+    {
+        m_multiTextureShader->Shutdown();
+        delete m_multiTextureShader;
+        m_multiTextureShader = nullptr;
+    }
 
-    // if (m_lightMapShader)
-    // {
-    //     m_lightMapShader->Shutdown();
-    //     delete m_lightMapShader;
-    //     m_lightMapShader = nullptr;
-    // }
+    if (m_lightMapShader)
+    {
+        m_lightMapShader->Shutdown();
+        delete m_lightMapShader;
+        m_lightMapShader = nullptr;
+    }
 
     if (m_alphaMapShader)
     {
         m_alphaMapShader->Shutdown();
         delete m_alphaMapShader;
         m_alphaMapShader = nullptr;
+    }
+
+    if (m_bumpmapShader)
+    {
+        m_bumpmapShader->Shutdown();
+        delete m_bumpmapShader;
+        m_bumpmapShader = nullptr;
     }
 }
 
@@ -261,7 +277,7 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, con
     if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
         return false;
 
-    m_camera->SetPosition(0.0f, 0.0f, -3.0f);
+    m_camera->SetPosition(0.0f, 0.0f, -5.0f);
     m_camera->SetRotation(0.0f, rotationY, 0.0f);
 
     return true;
@@ -284,6 +300,12 @@ bool GraphicsClass::Render() const
     m_direct3D->GetWorldMatrix(worldMatrix);
     m_direct3D->GetProjectionmatrix(projectionMatrix);
     m_direct3D->GetOrthoMatrix(orthoMatrix);
+
+    static float rotation = 0.0f;
+    rotation += static_cast<float>(XM_PI) * 0.0025f;
+    if (rotation > 360.0f) rotation -= 360.0f;
+
+    worldMatrix = XMMatrixRotationY(rotation);
 
     // float positionX = 0.0f;
     // float positionY = 0.0f;
@@ -328,25 +350,27 @@ bool GraphicsClass::Render() const
 
     m_model->Render(m_direct3D->GetDeviceContext());
 
+    m_bumpmapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+        m_model->GetTextureArray(), m_light->GetDirection(), m_light->GetDiffuseColor());
+
     // m_multiTextureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
     //     m_model->GetTextureArray());
 
     // m_lightMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
     //     m_model->GetTextureArray());
 
-    m_alphaMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-        m_model->GetTextureArray());
+    // m_alphaMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+    //     m_model->GetTextureArray());
 
     // 2D 렌더링을 위해 Z Buffer 끄기
     m_direct3D->TurnZBufferOff();
-
     // 텍스트 렌더링을 위해 알파 블렌딩 켜기
     m_direct3D->TurnOnAlphaBlending();
 
-    m_bitmap->Render(m_direct3D->GetDeviceContext());
-    if (!m_textureShader->Render(m_direct3D->GetDeviceContext(), m_bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
-        m_bitmap->GetTexture()))
-        return false;
+    // m_bitmap->Render(m_direct3D->GetDeviceContext());
+    // if (!m_textureShader->Render(m_direct3D->GetDeviceContext(), m_bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
+    //     m_bitmap->GetTexture()))
+    //     return false;
 
     // 텍스트 문자열 렌더링
     if (!m_text->Render(m_direct3D->GetDeviceContext(), worldMatrix, orthoMatrix))

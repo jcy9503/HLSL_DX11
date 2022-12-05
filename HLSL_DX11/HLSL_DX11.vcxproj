@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="AlphaMapShaderClass.cpp" />
     <ClCompile Include="BitmapClass.cpp" />
+    <ClCompile Include="BumpmapShaderClass.cpp" />
     <ClCompile Include="Cameraclass.cpp" />
     <ClCompile Include="Colorshaderclass.cpp" />
     <ClCompile Include="CPUClass.cpp" />
@@ -172,7 +173,7 @@
     <ClCompile Include="LightMapShaderClass.cpp" />
     <ClCompile Include="LightShaderClass.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Modelclass.cpp" />
+    <ClCompile Include="ModelClass.cpp" />
     <ClCompile Include="ModelListClass.cpp" />
     <ClCompile Include="MultiTextureShaderClass.cpp" />
     <ClCompile Include="PositionClass.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="AlignedAllocationPolicy.h" />
     <ClInclude Include="AlphaMapShaderClass.h" />
     <ClInclude Include="BitmapClass.h" />
+    <ClInclude Include="BumpmapShaderClass.h" />
     <ClInclude Include="Cameraclass.h" />
     <ClInclude Include="Colorshaderclass.h" />
     <ClInclude Include="CPUClass.h" />
@@ -204,7 +206,7 @@
     <ClInclude Include="LightClass.h" />
     <ClInclude Include="LightMapShaderClass.h" />
     <ClInclude Include="LightShaderClass.h" />
-    <ClInclude Include="Modelclass.h" />
+    <ClInclude Include="ModelClass.h" />
     <ClInclude Include="ModelListClass.h" />
     <ClInclude Include="MultiTextureShaderClass.h" />
     <ClInclude Include="PositionClass.h" />
@@ -221,6 +223,8 @@
   <ItemGroup>
     <Content Include="AlphamapShader\Alphamap.ps" />
     <Content Include="AlphamapShader\Alphamap.vs" />
+    <Content Include="BumpmapShader\Bumpmap.ps" />
+    <Content Include="BumpmapShader\Bumpmap.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

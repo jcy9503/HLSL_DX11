@@ -2,12 +2,12 @@
 #include <fstream>
 using namespace std;
 
-typedef struct VertexType
+struct VertexType
 {
     float x, y, z;
 };
 
-typedef struct FaceType
+struct FaceType
 {
     int vIndex1, vIndex2, vIndex3;
     int tIndex1, tIndex2, tIndex3;

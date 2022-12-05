@@ -17,6 +17,7 @@ class LightClass;
 class LightShaderClass;
 class LightMapShaderClass;
 class FrustumClass;
+class BumpmapShaderClass;
 class AlphaMapShaderClass;
 
 class GraphicsClass
@@ -46,4 +47,5 @@ private:
     MultiTextureShaderClass* m_multiTextureShader = nullptr;
     LightMapShaderClass* m_lightMapShader = nullptr;
     AlphaMapShaderClass* m_alphaMapShader = nullptr;
+    BumpmapShaderClass* m_bumpmapShader = nullptr;
 };
