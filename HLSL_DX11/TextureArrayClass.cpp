@@ -12,7 +12,7 @@ TextureArrayClass::TextureArrayClass(const TextureArrayClass&)
 TextureArrayClass::~TextureArrayClass()
 = default;
 
-bool TextureArrayClass::Initialize(ID3D11Device* device, WCHAR* filename1, WCHAR* filename2)
+bool TextureArrayClass::Initialize(ID3D11Device* device, WCHAR* filename1, WCHAR* filename2, WCHAR* filename3)
 {
     if(FAILED(CreateDDSTextureFromFile(device, filename1, nullptr, &m_textures[0])))
         return false;
@@ -20,8 +20,8 @@ bool TextureArrayClass::Initialize(ID3D11Device* device, WCHAR* filename1, WCHAR
     if(FAILED(CreateDDSTextureFromFile(device, filename2, nullptr, &m_textures[1])))
         return false;
 
-    // if(FAILED(CreateDDSTextureFromFile(device, filename3, nullptr, &m_textures[2])))
-    //     return false;
+    if(FAILED(CreateDDSTextureFromFile(device, filename3, nullptr, &m_textures[2])))
+        return false;
 
     return true;
 }

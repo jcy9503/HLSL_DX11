@@ -33,7 +33,7 @@ float4 BumpmapPixelShader(PixelInputType input) : SV_TARGET
     lightDir = -lightDirection;
     lightIntensity = saturate(dot(bumpNormal, lightDir));
     color = saturate(diffuseColor * lightIntensity);
-    color = color * textureColor;
+    //color = color * textureColor;
 
     return color;
 }

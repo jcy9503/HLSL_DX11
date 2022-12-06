@@ -13,6 +13,7 @@
 #include "MultiTextureShaderClass.h"
 #include "BumpmapShaderClass.h"
 #include "AlphaMapShaderClass.h"
+#include "SpecMapShaderClass.h"
 #include "GraphicsClass.h"
 
 GraphicsClass::GraphicsClass()
@@ -37,19 +38,19 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
 
     m_camera = new CameraClass;
     if (!m_camera) return false;
-    m_camera->SetPosition(0.0f, 0.0f, -5.0f);
+    m_camera->SetPosition(0.0f, 0.0f, -1.0f);
 
     XMMATRIX baseViewMatrix{};
     m_camera->Render();
     m_camera->GetViewMatrix(baseViewMatrix);
 
-    m_text = new TextClass;
-    if (!m_text) return false;
-    if (!m_text->Initialize(m_direct3D->GetDevice(), m_direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix))
-    {
-        MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    // m_text = new TextClass;
+    // if (!m_text) return false;
+    // if (!m_text->Initialize(m_direct3D->GetDevice(), m_direct3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix))
+    // {
+    //     MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK | MB_ICONERROR);
+    //     return false;
+    // }
 
     // m_textureShader = new TextureShaderClass;
     // if (!m_textureShader) return false;
@@ -68,24 +69,25 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     //     return false;
     // }
 
-    constexpr char model[] = "../HLSL_DX11/BumpmapShader/cube.txt";
-    WCHAR tex1[] = L"../HLSL_DX11/BumpmapShader/stone01.dds";
-    WCHAR tex2[] = L"../HLSL_DX11/BumpmapShader/bump01.dds";
+    constexpr char model[] = "../HLSL_DX11/SpecMapShader/cube.txt";
+    WCHAR tex1[] = L"../HLSL_DX11/SpecMapShader/stone02.dds";
+    WCHAR tex2[] = L"../HLSL_DX11/SpecMapShader/bump02.dds";
+    WCHAR tex3[] = L"../HLSL_DX11/SpecMapShader/spec02.dds";
     m_model = new ModelClass;
     if (!m_model) return false;
-    if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1, tex2))
+    if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1, tex2, tex3))
     {
         MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
-    m_bumpmapShader = new BumpmapShaderClass;
-    if (!m_bumpmapShader) return false;
-    if (!m_bumpmapShader->Initialize(m_direct3D->GetDevice(), hwnd))
-    {
-        MessageBox(hwnd, L"Could not initialize the bumpmap shader object.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
+    // m_bumpmapShader = new BumpmapShaderClass;
+    // if (!m_bumpmapShader) return false;
+    // if (!m_bumpmapShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    // {
+    //     MessageBox(hwnd, L"Could not initialize the bumpmap shader object.", L"Error", MB_OK | MB_ICONERROR);
+    //     return false;
+    // }
 
     // m_alphaMapShader = new AlphaMapShaderClass;
     // if (!m_alphaMapShader) return false;
@@ -151,10 +153,22 @@ bool GraphicsClass::Initialize(const int screenWidth, const int screenHeight, co
     //     return false;
     // }
     //
+
+    m_specMapShader = new SpecMapShaderClass;
+    if (!m_specMapShader) return false;
+    if (!m_specMapShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    {
+        MessageBox(hwnd, L"Could not initialize the specular map shader object.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
     m_light = new LightClass;
     if (!m_light) return false;
+
     m_light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
     m_light->SetDirection(0.0f, 0.0f, 1.0f);
+    m_light->SetSpecularcolor(1.0f, 1.0f, 1.0f, 1.0f);
+    m_light->SetSpecularPower(16.0f);
 
     return true;
 }
@@ -173,26 +187,26 @@ void GraphicsClass::Shutdown()
         m_camera = nullptr;
     }
 
-    if (m_text)
-    {
-        m_text->Shutdown();
-        delete m_text;
-        m_text = nullptr;
-    }
-
-    if (m_textureShader)
-    {
-        m_textureShader->Shutdown();
-        delete m_textureShader;
-        m_textureShader = nullptr;
-    }
-
-    if (m_bitmap)
-    {
-        m_bitmap->Shutdown();
-        delete m_bitmap;
-        m_bitmap = nullptr;
-    }
+    // if (m_text)
+    // {
+    //     m_text->Shutdown();
+    //     delete m_text;
+    //     m_text = nullptr;
+    // }
+    //
+    // if (m_textureShader)
+    // {
+    //     m_textureShader->Shutdown();
+    //     delete m_textureShader;
+    //     m_textureShader = nullptr;
+    // }
+    //
+    // if (m_bitmap)
+    // {
+    //     m_bitmap->Shutdown();
+    //     delete m_bitmap;
+    //     m_bitmap = nullptr;
+    // }
 
     if (m_model)
     {
@@ -201,58 +215,65 @@ void GraphicsClass::Shutdown()
         m_model = nullptr;
     }
 
-    if (m_modelList)
-    {
-        m_modelList->Shutdown();
-        delete m_modelList;
-        m_modelList = nullptr;
-    }
-    
+    // if (m_modelList)
+    // {
+    //     m_modelList->Shutdown();
+    //     delete m_modelList;
+    //     m_modelList = nullptr;
+    // }
+
     if (m_light)
     {
         delete m_light;
         m_light = nullptr;
     }
-    
-    if (m_lightShader)
-    {
-        m_lightShader->Shutdown();
-        delete m_lightShader;
-        m_lightShader = nullptr;
-    }
-    
-    if (m_frustum)
-    {
-        delete m_frustum;
-        m_frustum = nullptr;
-    }
 
-    if (m_multiTextureShader)
-    {
-        m_multiTextureShader->Shutdown();
-        delete m_multiTextureShader;
-        m_multiTextureShader = nullptr;
-    }
+    // if (m_lightShader)
+    // {
+    //     m_lightShader->Shutdown();
+    //     delete m_lightShader;
+    //     m_lightShader = nullptr;
+    // }
+    //
+    // if (m_frustum)
+    // {
+    //     delete m_frustum;
+    //     m_frustum = nullptr;
+    // }
+    //
+    // if (m_multiTextureShader)
+    // {
+    //     m_multiTextureShader->Shutdown();
+    //     delete m_multiTextureShader;
+    //     m_multiTextureShader = nullptr;
+    // }
+    //
+    // if (m_lightMapShader)
+    // {
+    //     m_lightMapShader->Shutdown();
+    //     delete m_lightMapShader;
+    //     m_lightMapShader = nullptr;
+    // }
+    //
+    // if (m_alphaMapShader)
+    // {
+    //     m_alphaMapShader->Shutdown();
+    //     delete m_alphaMapShader;
+    //     m_alphaMapShader = nullptr;
+    // }
+    //
+    // if (m_bumpmapShader)
+    // {
+    //     m_bumpmapShader->Shutdown();
+    //     delete m_bumpmapShader;
+    //     m_bumpmapShader = nullptr;
+    // }
 
-    if (m_lightMapShader)
+    if (m_specMapShader)
     {
-        m_lightMapShader->Shutdown();
-        delete m_lightMapShader;
-        m_lightMapShader = nullptr;
-    }
-
-    if (m_alphaMapShader)
-    {
-        m_alphaMapShader->Shutdown();
-        delete m_alphaMapShader;
-        m_alphaMapShader = nullptr;
-    }
-
-    if (m_bumpmapShader)
-    {
-        m_bumpmapShader->Shutdown();
-        delete m_bumpmapShader;
-        m_bumpmapShader = nullptr;
+        m_specMapShader->Shutdown();
+        delete m_specMapShader;
+        m_specMapShader = nullptr;
     }
 }
 
@@ -271,11 +292,11 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, con
     // if(!m_bitmap->SetMousePosition(m_direct3D->GetDeviceContext(), mouseX, mouseY))
     //     return false;
 
-    if (!m_text->SetFps(m_direct3D->GetDeviceContext(), fps))
-        return false;
-
-    if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
-        return false;
+    // if (!m_text->SetFps(m_direct3D->GetDeviceContext(), fps))
+    //     return false;
+    //
+    // if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
+    //     return false;
 
     m_camera->SetPosition(0.0f, 0.0f, -5.0f);
     m_camera->SetRotation(0.0f, rotationY, 0.0f);
@@ -350,8 +371,12 @@ bool GraphicsClass::Render() const
 
     m_model->Render(m_direct3D->GetDeviceContext());
 
-    m_bumpmapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-        m_model->GetTextureArray(), m_light->GetDirection(), m_light->GetDiffuseColor());
+    m_specMapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+        m_model->GetTextureArray(), m_light->GetDirection(), m_light->GetDiffuseColor(), m_camera->GetPosition(),
+        m_light->GetSpecularColor(), m_light->GetSpecularPower());
+
+    // m_bumpmapShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+    //     m_model->GetTextureArray(), m_light->GetDirection(), m_light->GetDiffuseColor());
 
     // m_multiTextureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
     //     m_model->GetTextureArray());
@@ -363,9 +388,9 @@ bool GraphicsClass::Render() const
     //     m_model->GetTextureArray());
 
     // 2D 렌더링을 위해 Z Buffer 끄기
-    m_direct3D->TurnZBufferOff();
+    // m_direct3D->TurnZBufferOff();
     // 텍스트 렌더링을 위해 알파 블렌딩 켜기
-    m_direct3D->TurnOnAlphaBlending();
+    // m_direct3D->TurnOnAlphaBlending();
 
     // m_bitmap->Render(m_direct3D->GetDeviceContext());
     // if (!m_textureShader->Render(m_direct3D->GetDeviceContext(), m_bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
@@ -373,11 +398,11 @@ bool GraphicsClass::Render() const
     //     return false;
 
     // 텍스트 문자열 렌더링
-    if (!m_text->Render(m_direct3D->GetDeviceContext(), worldMatrix, orthoMatrix))
-        return false;
-
-    m_direct3D->TurnOffAlphaBlending();
-    m_direct3D->TurnZBufferOn();
+    // if (!m_text->Render(m_direct3D->GetDeviceContext(), worldMatrix, orthoMatrix))
+    //     return false;
+    //
+    // m_direct3D->TurnOffAlphaBlending();
+    // m_direct3D->TurnZBufferOn();
 
     // m_direct3D->TurnZBufferOff();
     //
@@ -406,8 +431,8 @@ bool GraphicsClass::Render() const
 
 bool GraphicsClass::InputKey(const char input) const
 {
-    if (!m_text->KeyInput(m_direct3D->GetDeviceContext(), input))
-        return false;
+    // if (!m_text->KeyInput(m_direct3D->GetDeviceContext(), input))
+    //     return false;
 
     return true;
 }

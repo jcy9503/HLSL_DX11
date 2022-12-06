@@ -178,6 +178,7 @@
     <ClCompile Include="MultiTextureShaderClass.cpp" />
     <ClCompile Include="PositionClass.cpp" />
     <ClCompile Include="SoundClass.cpp" />
+    <ClCompile Include="SpecMapShaderClass.cpp" />
     <ClCompile Include="Stdafx.cpp" />
     <ClCompile Include="SystemClass.cpp" />
     <ClCompile Include="TextClass.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="MultiTextureShaderClass.h" />
     <ClInclude Include="PositionClass.h" />
     <ClInclude Include="SoundClass.h" />
+    <ClInclude Include="SpecMapShaderClass.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="SystemClass.h" />
     <ClInclude Include="targetver.h" />
@@ -221,10 +223,8 @@
     <ClInclude Include="TimerClass.h" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AlphamapShader\Alphamap.ps" />
-    <Content Include="AlphamapShader\Alphamap.vs" />
-    <Content Include="BumpmapShader\Bumpmap.ps" />
-    <Content Include="BumpmapShader\Bumpmap.vs" />
+    <Content Include="SpecMapShader\SpecMap.ps" />
+    <Content Include="SpecMapShader\SpecMap.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
