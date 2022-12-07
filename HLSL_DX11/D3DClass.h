@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "DxDefine.h"
 
 class D3DClass : public AlignedAllocationPolicy<16>
 {
@@ -28,6 +27,9 @@ public:
 
     void TurnOnAlphaBlending() const;
     void TurnOffAlphaBlending() const;
+
+    ID3D11DepthStencilView* GetDepthStencilView() const;
+    void SetBackBufferRenderTarget() const;
 
 private:
     bool m_vsync_enabled = false;

@@ -391,3 +391,13 @@ void D3DClass::TurnOffAlphaBlending() const
 
     m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, blendFactor, 0xffffffff);
 }
+
+ID3D11DepthStencilView* D3DClass::GetDepthStencilView() const
+{
+    return m_depthStencilView;
+}
+
+void D3DClass::SetBackBufferRenderTarget() const
+{
+    m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
+}

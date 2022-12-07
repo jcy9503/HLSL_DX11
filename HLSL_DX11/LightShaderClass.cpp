@@ -15,8 +15,8 @@ bool LightShaderClass::Initialize(ID3D11Device* device, const HWND hwnd, const i
 {
     m_lightVersion = lightVer;
 
-    constexpr WCHAR vsFileAmbient[] = L"../HLSL_DX11/LightShader/PointLight.vs";
-    constexpr WCHAR psFileAmbient[] = L"../HLSL_DX11/LightShader/PointLight.ps";
+    constexpr WCHAR vsFileAmbient[] = L"../HLSL_DX11/Demo22/texture.vs";
+    constexpr WCHAR psFileAmbient[] = L"../HLSL_DX11/Demo22/texture.ps";
     constexpr WCHAR vsFileDir[] = L"../HLSL_DX11/LightShader/DirLight.vs";
     constexpr WCHAR psFileDir[] = L"../HLSL_DX11/LightShader/DirLight.ps";
     
@@ -40,7 +40,7 @@ void LightShaderClass::Shutdown()
 
 bool LightShaderClass::Render(ID3D11DeviceContext* deviceContext, const int indexCount, const XMMATRIX worldMatrix,
                               const XMMATRIX viewMatrix, const XMMATRIX projectionMatrix,
-                              ID3D11ShaderResourceView* texture, const XMFLOAT3 lightDirection,
+                              ID3D11ShaderResourceView** texture, const XMFLOAT3 lightDirection,
                               const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor, const XMFLOAT3 cameraPosition,
                               const XMFLOAT4 specularColor, const float specularPower) const
 {
@@ -58,7 +58,7 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, c
     ID3D10Blob* errorMessage = nullptr;
 
     ID3D10Blob* vertexShaderBuffer = nullptr;
-    HRESULT result = D3DCompileFromFile(vsFilename, nullptr, nullptr, "LightVertexShader", "vs_5_0",
+    HRESULT result = D3DCompileFromFile(vsFilename, nullptr, nullptr, "TextureVertexShader", "vs_5_0",
         D3D10_SHADER_ENABLE_STRICTNESS, 0, &vertexShaderBuffer, &errorMessage);
     if (FAILED(result))
     {
@@ -75,7 +75,7 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, c
     }
 
     ID3D10Blob* pixelShaderBuffer = nullptr;
-    result = D3DCompileFromFile(psFilename, nullptr, nullptr, "LightPixelShader", "ps_5_0",
+    result = D3DCompileFromFile(psFilename, nullptr, nullptr, "TexturePixelShader", "ps_5_0",
         D3D10_SHADER_ENABLE_STRICTNESS, 0, &pixelShaderBuffer, &errorMessage);
     if (FAILED(result))
     {
@@ -260,12 +260,12 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, const 
 
 bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix,
                                            XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
-                                           ID3D11ShaderResourceView* texture, const XMFLOAT3 lightDirection,
+                                           ID3D11ShaderResourceView** texture, const XMFLOAT3 lightDirection,
                                            const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor,
                                            const XMFLOAT3 cameraPosition, const XMFLOAT4 specularColor,
                                            const float specularPower) const
 {
-    deviceContext->PSSetShaderResources(0, 1, &texture);
+    deviceContext->PSSetShaderResources(0, 1, &texture[0]);
     
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     HRESULT result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
