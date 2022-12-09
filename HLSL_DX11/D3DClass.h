@@ -16,7 +16,7 @@ public:
     ID3D11Device* GetDevice() const;
     ID3D11DeviceContext* GetDeviceContext() const;
 
-    void GetProjectionmatrix(XMMATRIX&) const;
+    void GetProjectionMatrix(XMMATRIX&) const;
     void GetWorldMatrix(XMMATRIX&) const;
     void GetOrthoMatrix(XMMATRIX&) const;
 

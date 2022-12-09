@@ -347,7 +347,7 @@ ID3D11DeviceContext* D3DClass::GetDeviceContext() const
     return m_deviceContext;
 }
 
-void D3DClass::GetProjectionmatrix(XMMATRIX& projectionMatrix) const
+void D3DClass::GetProjectionMatrix(XMMATRIX& projectionMatrix) const
 {
     projectionMatrix = m_projectionMatrix;
 }

@@ -163,6 +163,7 @@
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DebugWindowClass.cpp" />
+    <ClCompile Include="FogShaderClass.cpp" />
     <ClCompile Include="FontClass.cpp" />
     <ClCompile Include="FontShaderClass.cpp" />
     <ClCompile Include="FPSClass.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DebugWindowClass.h" />
     <ClInclude Include="DxDefine.h" />
+    <ClInclude Include="FogShaderClass.h" />
     <ClInclude Include="FontClass.h" />
     <ClInclude Include="FontShaderClass.h" />
     <ClInclude Include="FPSClass.h" />
@@ -227,8 +229,8 @@
     <ClInclude Include="TimerClass.h" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SpecMapShader\SpecMap.ps" />
-    <Content Include="SpecMapShader\SpecMap.vs" />
+    <Content Include="FogShader\Fog.ps" />
+    <Content Include="FogShader\Fog.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
