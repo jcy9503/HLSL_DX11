@@ -8,7 +8,8 @@ constexpr float SCREEN_NEAR = 0.1f;
 class D3DClass;
 class CameraClass;
 class ModelClass;
-class TranslateShaderClass;
+class TextureShaderClass;
+class TransparentShaderClass;
 
 class GraphicsClass
 {
@@ -26,6 +27,8 @@ public:
 private:
 	D3DClass* m_direct3D = nullptr;
 	CameraClass* m_camera = nullptr;
-	ModelClass* m_model = nullptr;
-	TranslateShaderClass* m_translateShader = nullptr;
+	ModelClass* m_model1 = nullptr;
+	ModelClass* m_model2 = nullptr;
+	TextureShaderClass* m_textureShader = nullptr;
+	TransparentShaderClass* m_transparentShader = nullptr;
 };

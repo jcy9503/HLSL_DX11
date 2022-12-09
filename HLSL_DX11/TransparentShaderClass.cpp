@@ -1,35 +1,35 @@
 ﻿#include "Stdafx.h"
-#include "TextureShaderClass.h"
+#include "TransparentShaderClass.h"
 
 #include <complex>
 
-TextureShaderClass::TextureShaderClass()
+TransparentShaderClass::TransparentShaderClass()
 = default;
 
-TextureShaderClass::TextureShaderClass(const TextureShaderClass&)
+TransparentShaderClass::TransparentShaderClass(const TransparentShaderClass&)
 {
 }
 
-TextureShaderClass::~TextureShaderClass()
+TransparentShaderClass::~TransparentShaderClass()
 = default;
 
-bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+bool TransparentShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
-    constexpr WCHAR vsFile[] = L"../HLSL_DX11/Demo05/Texture.vs";
-    constexpr WCHAR psFile[] = L"../HLSL_DX11/Demo05/Texture.ps";
+    constexpr WCHAR vsFile[] = L"../HLSL_DX11/TransparentShader/Transparent.vs";
+    constexpr WCHAR psFile[] = L"../HLSL_DX11/TransparentShader/Transparent.ps";
     return InitializeShader(device, hwnd, vsFile, psFile);
 }
 
-void TextureShaderClass::Shutdown()
+void TransparentShaderClass::Shutdown()
 {
     ShutdownShader();
 }
 
-bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, const int indexCount,
+bool TransparentShaderClass::Render(ID3D11DeviceContext* deviceContext, const int indexCount,
                                 const XMMATRIX worldMatrix, const XMMATRIX viewMatrix, const XMMATRIX projectionMatrix,
-                                ID3D11ShaderResourceView** texture) const
+                                ID3D11ShaderResourceView** texture, float blend) const
 {
-    if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture[0]))
+    if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture[0], blend))
     {
         return false;
     }
@@ -39,13 +39,13 @@ bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, const int in
     return true;
 }
 
-bool TextureShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, const WCHAR* vsFilename,
+bool TransparentShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, const WCHAR* vsFilename,
                                           const WCHAR* psFilename)
 {
     ID3D10Blob* errorMessage = nullptr;
 
     ID3D10Blob* vertexShaderBuffer = nullptr;
-    HRESULT result = D3DCompileFromFile(vsFilename, nullptr, nullptr, "TextureVertexShader",
+    HRESULT result = D3DCompileFromFile(vsFilename, nullptr, nullptr, "TransparentVertexShader",
                                         "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
                                         &vertexShaderBuffer, &errorMessage);
     if (FAILED(result))
@@ -63,7 +63,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd,
     }
 
     ID3D10Blob* pixelShaderBuffer = nullptr;
-    result = D3DCompileFromFile(psFilename, nullptr, nullptr, "TexturePixelShader",
+    result = D3DCompileFromFile(psFilename, nullptr, nullptr, "TransparentPixelShader",
                                 "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
                                 &pixelShaderBuffer, &errorMessage);
     if (FAILED(result))
@@ -146,11 +146,28 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd,
     result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
     if (FAILED(result)) return false;
 
+    D3D11_BUFFER_DESC transparentBufferDesc;
+    transparentBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    transparentBufferDesc.ByteWidth = sizeof(TransparentBufferType);
+    transparentBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    transparentBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    transparentBufferDesc.MiscFlags = 0;
+    transparentBufferDesc.StructureByteStride = 0;
+
+    result = device->CreateBuffer(&transparentBufferDesc, nullptr, &m_transparentBuffer);
+    if(FAILED(result)) return false;
+
     return true;
 }
 
-void TextureShaderClass::ShutdownShader()
+void TransparentShaderClass::ShutdownShader()
 {
+    if(m_transparentBuffer)
+    {
+        m_transparentBuffer->Release();
+        m_transparentBuffer = nullptr;
+    }
+    
     if (m_matrixBuffer)
     {
         m_matrixBuffer->Release();
@@ -178,27 +195,27 @@ void TextureShaderClass::ShutdownShader()
     }
 }
 
-void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, const HWND hwnd,
+void TransparentShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, const HWND hwnd,
                                                   const WCHAR* shaderFilename)
 {
-    OutputDebugStringA(static_cast<const char*>(errorMessage->GetBufferPointer()));
-
+    printf("%s\n", static_cast<const char*>(errorMessage->GetBufferPointer()));
+    
     errorMessage->Release();
     errorMessage = nullptr;
 
     MessageBox(hwnd, L"Error Compiling Shader.", shaderFilename, MB_OK | MB_ICONERROR);
 }
 
-bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
+bool TransparentShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
                                              XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
-                                             ID3D11ShaderResourceView* texture) const
+                                             ID3D11ShaderResourceView* texture, float blend) const
 {
     worldMatrix = XMMatrixTranspose(worldMatrix);
     viewMatrix = XMMatrixTranspose(viewMatrix);
     projectionMatrix = XMMatrixTranspose(projectionMatrix);
 
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    const HRESULT result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD,
+    HRESULT result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD,
                                               0, &mappedResource);
     if (FAILED(result)) return false;
 
@@ -210,15 +227,28 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
     deviceContext->Unmap(m_matrixBuffer, 0);
 
-    constexpr unsigned int bufferNumber = 0;
+    unsigned int bufferNumber = 0;
 
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
     deviceContext->PSSetShaderResources(0, 1, &texture);
 
+    result = deviceContext->Map(m_transparentBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    if(FAILED(result)) return false;
+
+    const auto dataPtr2 = static_cast<TransparentBufferType*>(mappedResource.pData);
+
+    dataPtr2->blendAmount = blend;
+
+    deviceContext->Unmap(m_transparentBuffer, 0);
+
+    bufferNumber = 0;
+
+    deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_transparentBuffer);
+
     return true;
 }
 
-void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, const int indexCount) const
+void TransparentShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, const int indexCount) const
 {
     deviceContext->IASetInputLayout(m_layout);
     deviceContext->VSSetShader(m_vertexShader, nullptr, 0);
