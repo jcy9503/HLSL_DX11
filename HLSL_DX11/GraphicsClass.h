@@ -8,7 +8,7 @@ constexpr float SCREEN_NEAR = 0.1f;
 class D3DClass;
 class CameraClass;
 class ModelClass;
-class ClipPlaneShaderClass;
+class TranslateShaderClass;
 
 class GraphicsClass
 {
@@ -27,5 +27,5 @@ private:
 	D3DClass* m_direct3D = nullptr;
 	CameraClass* m_camera = nullptr;
 	ModelClass* m_model = nullptr;
-	ClipPlaneShaderClass* m_clipPlaneShader = nullptr;
+	TranslateShaderClass* m_translateShader = nullptr;
 };

@@ -2,7 +2,7 @@
 #include "D3DClass.h"
 #include "Cameraclass.h"
 #include "ModelClass.h"
-#include "ClipPlaneShaderClass.h"
+#include "TranslateShaderClass.h"
 #include "GraphicsClass.h"
 
 
@@ -30,8 +30,8 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
     m_camera = new CameraClass;
     if (!m_camera) return false;
 
-    constexpr char model[] = "../HLSL_DX11/Geometry/cube.txt";
-    WCHAR tex1[] = L"../HLSL_DX11/ClipPlaneShader/seafloor.dds";
+    constexpr char model[] = "../HLSL_DX11/Geometry/triangle.txt";
+    WCHAR tex1[] = L"../HLSL_DX11/Texture/seafloor.dds";
     m_model = new ModelClass;
     if (!m_model) return false;
     if (!m_model->Initialize(m_direct3D->GetDevice(), model, tex1))
@@ -40,11 +40,11 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
         return false;
     }
 
-    m_clipPlaneShader = new ClipPlaneShaderClass;
-    if (!m_clipPlaneShader) return false;
-    if (!m_clipPlaneShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    m_translateShader = new TranslateShaderClass;
+    if (!m_translateShader) return false;
+    if (!m_translateShader->Initialize(m_direct3D->GetDevice(), hwnd))
     {
-        MessageBox(hwnd, L"Could not initialize the clip plane shader object.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(hwnd, L"Could not initialize the texture translation shader object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -73,11 +73,11 @@ void GraphicsClass::Shutdown()
         m_model = nullptr;
     }
 
-    if (m_clipPlaneShader)
+    if (m_translateShader)
     {
-        m_clipPlaneShader->Shutdown();
-        delete m_clipPlaneShader;
-        m_clipPlaneShader = nullptr;
+        m_translateShader->Shutdown();
+        delete m_translateShader;
+        m_translateShader = nullptr;
     }
 }
 
@@ -96,8 +96,8 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, con
     // if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
     //     return false;
 
-    m_camera->SetPosition(0.0f, 3.0f, -5.0f);
-    m_camera->SetRotation(30.0f, rotationY, -0.0f);
+    m_camera->SetPosition(0.0f, 0.0f, -5.0f);
+    m_camera->SetRotation(0.0f, rotationY, 0.0f);
 
     return true;
 }
@@ -126,9 +126,12 @@ bool GraphicsClass::Render()
 
     m_model->Render(m_direct3D->GetDeviceContext());
 
-    constexpr auto clipPlane = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
-    if (!m_clipPlaneShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-        m_model->GetTextureArray(), clipPlane))
+    static float textureTranslation = 0.0f;
+    textureTranslation += 0.005f;
+    if (textureTranslation > 1.0f) textureTranslation -= 1.0f;
+
+    if (!m_translateShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+        m_model->GetTextureArray(), textureTranslation))
         return false;
 
     m_direct3D->EndScene();
