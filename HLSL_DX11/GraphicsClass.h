@@ -10,7 +10,8 @@ class CameraClass;
 class ModelClass;
 class TextureShaderClass;
 class RenderTextureClass;
-class ReflectionShaderClass;
+class BitmapClass;
+class FadeShaderClass;
 
 class GraphicsClass
 {
@@ -21,20 +22,25 @@ public:
 
 	bool Initialize(int, int, HWND);
 	void Shutdown();
-	bool Frame(int, int, int, int, float, float, float) const;
-	bool Render() const;
+	bool Frame(int, int, int, int, float, float, float);
+	bool Render();
 	// static bool InputKey(char);
 
 private:
-	bool RenderTexture() const;
-	bool RenderScene() const;
+	bool RenderToTexture(float);
+	bool RenderFadingScene();
+	bool RenderNormalScene(float);
 
 private:
 	D3DClass* m_direct3D = nullptr;
 	CameraClass* m_camera = nullptr;
 	ModelClass* m_model = nullptr;
-	ModelClass* m_modelFloor = nullptr;
 	TextureShaderClass* m_textureShader = nullptr;
 	RenderTextureClass* m_renderTexture = nullptr;
-	ReflectionShaderClass* m_reflectionShader = nullptr;
+	BitmapClass* m_bitmap = nullptr;
+	FadeShaderClass* m_fadeShader = nullptr;
+	float m_fadeInTime = 0;
+	float m_accumulatedTime = 0;
+	float m_fadePercentage = 0;
+	bool m_fadeDone = false;
 };

@@ -1,5 +1,4 @@
 #include "Stdafx.h"
-#include "TextureClass.h"
 #include "BitmapClass.h"
 
 BitmapClass::BitmapClass()
@@ -12,8 +11,7 @@ BitmapClass::BitmapClass(const BitmapClass&)
 BitmapClass::~BitmapClass()
 = default;
 
-bool BitmapClass::Initialize(ID3D11Device* device, const int screenWidth, int screenHeight, WCHAR* textureFilename,
-                             const int bitmapWidth, const int bitmapHeight)
+bool BitmapClass::Initialize(ID3D11Device* device, int screenWidth, int screenHeight, int bitmapWidth, int bitmapHeight)
 {
     m_screenWidth = screenWidth;
     m_screenHeight = screenHeight;
@@ -24,34 +22,27 @@ bool BitmapClass::Initialize(ID3D11Device* device, const int screenWidth, int sc
 
     if (!Initializebuffers(device)) return false;
 
-    return LoadTexture(device, textureFilename);
+    return true;
 }
 
 void BitmapClass::Shutdown()
 {
-    ReleaseTexture();
-
     ShutdownBuffers();
 }
 
-void BitmapClass::Render(ID3D11DeviceContext* deviceContext) const
+bool BitmapClass::Render(ID3D11DeviceContext* deviceContext, int positionX, int positionY)
 {
-    constexpr UINT stride = sizeof(VertexType);
-    constexpr UINT offset = 0;
+    if(!UpdateBuffers(deviceContext, positionX, positionY))
+        return false;
 
-    deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-    deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    RenderBuffers(deviceContext);
+
+    return true;
 }
 
 int BitmapClass::GetIndexCount() const
 {
     return m_indexCount;
-}
-
-ID3D11ShaderResourceView* BitmapClass::GetTexture() const
-{
-    return m_texture->GetTexture();
 }
 
 bool BitmapClass::Initializebuffers(ID3D11Device* device)
@@ -173,28 +164,13 @@ bool BitmapClass::UpdateBuffers(ID3D11DeviceContext* deviceContext, int position
     return true;
 }
 
-bool BitmapClass::LoadTexture(ID3D11Device* device, const WCHAR* filename)
+void BitmapClass::RenderBuffers(ID3D11DeviceContext* deviceContext) const
 {
-    m_texture = new TextureClass;
-    if (!m_texture) return false;
+    constexpr UINT stride = sizeof(VertexType);
+    constexpr UINT offset = 0;
 
-    return m_texture->Initialize(device, filename);
+    deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+    deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void BitmapClass::ReleaseTexture()
-{
-    if (m_texture)
-    {
-        m_texture->Shutdown();
-        delete m_texture;
-        m_texture = nullptr;
-    }
-}
-
-bool BitmapClass::SetMousePosition(ID3D11DeviceContext* deviceContext, const int mouseX, const int mouseY)
-{
-    if(!UpdateBuffers(deviceContext, mouseX, mouseY))
-        return false;
-
-    return true;
-}

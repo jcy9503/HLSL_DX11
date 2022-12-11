@@ -4,7 +4,8 @@
 #include "ModelClass.h"
 #include "TextureShaderClass.h"
 #include "RenderTextureClass.h"
-#include "ReflectionShaderClass.h"
+#include "BitmapClass.h"
+#include "FadeShaderClass.h"
 #include "GraphicsClass.h"
 
 
@@ -55,21 +56,23 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
     if (!m_renderTexture->Initialize(m_direct3D->GetDevice(), screenWidth, screenHeight))
         return false;
 
-    constexpr char model2[] = "../HLSL_DX11/Geometry/floor.txt";
-    WCHAR tex2[] = L"../HLSL_DX11/Texture/blue01.dds";
-    m_modelFloor = new ModelClass;
-    if (!m_modelFloor) return false;
-    if (!m_modelFloor->Initialize(m_direct3D->GetDevice(), model2, tex2))
+    m_bitmap = new BitmapClass;
+    if (!m_bitmap) return false;
+    if (!m_bitmap->Initialize(m_direct3D->GetDevice(), screenWidth, screenHeight, screenWidth, screenHeight))
     {
-        MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
-    m_reflectionShader = new ReflectionShaderClass;
-    if (!m_reflectionShader) return false;
-    if (!m_reflectionShader->Initialize(m_direct3D->GetDevice(), hwnd))
+    m_fadeInTime = 1000.0f;
+    m_accumulatedTime = 0;
+    m_fadePercentage = 0;
+    m_fadeDone = false;
+    m_fadeShader = new FadeShaderClass;
+    if (!m_fadeShader) return false;
+    if (!m_fadeShader->Initialize(m_direct3D->GetDevice(), hwnd))
     {
-        MessageBox(hwnd, L"Could not initialize the reflection shader object.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(hwnd, L"Could not initialize the fade shader object.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -98,20 +101,6 @@ void GraphicsClass::Shutdown()
         m_model = nullptr;
     }
 
-    if (m_modelFloor)
-    {
-        m_modelFloor->Shutdown();
-        delete m_modelFloor;
-        m_modelFloor = nullptr;
-    }
-
-    if (m_reflectionShader)
-    {
-        m_reflectionShader->Shutdown();
-        delete m_reflectionShader;
-        m_reflectionShader = nullptr;
-    }
-
     if (m_textureShader)
     {
         m_textureShader->Shutdown();
@@ -125,10 +114,25 @@ void GraphicsClass::Shutdown()
         delete m_renderTexture;
         m_renderTexture = nullptr;
     }
+
+    if (m_fadeShader)
+    {
+        m_fadeShader->Shutdown();
+        delete m_fadeShader;
+        m_fadeShader = nullptr;
+    }
+
+    if (m_bitmap)
+    {
+        m_bitmap->Shutdown();
+        delete m_bitmap;
+        m_bitmap = nullptr;
+    }
 }
 
 
-bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, const int cpu, float frameTime, const float rotationX, const float rotationY) const
+bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, const int cpu, float frameTime, const float rotationX,
+                          const float rotationY)
 {
     // if (!m_text->SetMousePosition(mouseX, mouseY, m_direct3D->GetDeviceContext()))
     //     return false;
@@ -142,48 +146,85 @@ bool GraphicsClass::Frame(const int mouseX, const int mouseY, const int fps, con
     // if (!m_text->SetCpu(m_direct3D->GetDeviceContext(), cpu))
     //     return false;
 
-    m_camera->SetPosition(0.0f, 0.0f, -10.0f);
+    if (!m_fadeDone)
+    {
+        m_accumulatedTime += frameTime;
+        if (m_accumulatedTime < m_fadeInTime)
+            m_fadePercentage = m_accumulatedTime / m_fadeInTime;
+        else
+        {
+            m_fadeDone = true;
+            m_fadePercentage = 1.0f;
+        }
+    }
+    else
+    {
+        m_accumulatedTime -= frameTime;
+        if(m_accumulatedTime > 0)
+            m_fadePercentage = m_accumulatedTime / m_fadeInTime;
+        else
+        {
+            m_fadeDone = false;
+            m_fadePercentage = 0.0f;
+        }
+    }
+
+    m_camera->SetPosition(0.0f, 0.0f, -6.0f);
     m_camera->SetRotation(rotationX, rotationY, 0.0f);
 
     return true;
 }
 
 
-bool GraphicsClass::Render() const
+bool GraphicsClass::Render()
 {
-    if (!RenderTexture())
-        return false;
+    static float rotation = 0.0f;
+    bool result;
 
-    if (!RenderScene())
-        return false;
+    rotation += static_cast<float>(XM_PI) * 0.005f;
+    if (rotation > 360.0f) rotation -= 360.0f;
+
+    if (m_fadeDone)
+    {
+        result = RenderToTexture(rotation);
+        if(!result) return false;
+        
+        result = RenderFadingScene();
+        if(!result) return false;
+    }
+    else
+    {
+        result = RenderToTexture(rotation);
+        if (!result) return false;
+
+        result = RenderFadingScene();
+        if (!result) return false;
+    }
 
     return true;
 }
 
-bool GraphicsClass::RenderTexture() const
+bool GraphicsClass::RenderToTexture(float rotation)
 {
     XMMATRIX worldMatrix{};
+    XMMATRIX viewMatrix{};
     XMMATRIX projectionMatrix{};
 
     m_renderTexture->SetRenderTarget(m_direct3D->GetDeviceContext(), m_direct3D->GetDepthStencilView());
 
     m_renderTexture->ClearRenderTarget(m_direct3D->GetDeviceContext(), m_direct3D->GetDepthStencilView(), 0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_camera->RenderReflection(-1.5f);
-
-    const XMMATRIX reflectionMatrix = m_camera->GetReflectionViewMatrix();
+    m_camera->Render();
 
     m_direct3D->GetWorldMatrix(worldMatrix);
+    m_camera->GetViewMatrix(viewMatrix);
     m_direct3D->GetProjectionMatrix(projectionMatrix);
 
-    static float rotation = 0.0f;
-    rotation += static_cast<float>(XM_PI) * 0.005f;
-    if (rotation > 360.0f) rotation -= 360.0f;
     worldMatrix = XMMatrixRotationY(rotation);
 
     m_model->Render(m_direct3D->GetDeviceContext());
 
-    m_textureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, reflectionMatrix, projectionMatrix,
+    m_textureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
         m_model->GetTextureArray());
 
     m_direct3D->SetBackBufferRenderTarget();
@@ -191,40 +232,56 @@ bool GraphicsClass::RenderTexture() const
     return true;
 }
 
-bool GraphicsClass::RenderScene() const
+bool GraphicsClass::RenderFadingScene()
 {
-    m_direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+    m_direct3D->BeginScene(0.0f, 1.0f, 0.0f, 1.0f);
+
+    m_camera->Render();
+
+    XMMATRIX worldMatrix{};
+    XMMATRIX viewMatrix{};
+    XMMATRIX orthoMatrix{};
+
+    m_direct3D->GetWorldMatrix(worldMatrix);
+    m_camera->GetViewMatrix(viewMatrix);
+    m_direct3D->GetOrthoMatrix(orthoMatrix);
+
+    m_direct3D->TurnZBufferOff();
+
+    bool result = m_bitmap->Render(m_direct3D->GetDeviceContext(), 0, 0);
+    if (!result) return false;
+
+    result = m_fadeShader->Render(m_direct3D->GetDeviceContext(), m_bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix,
+        m_renderTexture->GetShaderResourceView(), m_fadePercentage);
+    if (!result) return false;
+
+    m_direct3D->TurnZBufferOn();
+
+    m_direct3D->EndScene();
+
+    return true;
+}
+
+bool GraphicsClass::RenderNormalScene(float rotation)
+{
+    m_direct3D->BeginScene(0.0f, 0.0f, 1.0f, 1.0f);
 
     m_camera->Render();
 
     XMMATRIX worldMatrix{};
     XMMATRIX viewMatrix{};
     XMMATRIX projectionMatrix{};
+
     m_direct3D->GetWorldMatrix(worldMatrix);
     m_camera->GetViewMatrix(viewMatrix);
     m_direct3D->GetProjectionMatrix(projectionMatrix);
 
-    static float rotation = 0.0f;
-    rotation += static_cast<float>(XM_PI) * 0.005f;
-    if (rotation > 360.0f) rotation -= 360.0f;
     worldMatrix = XMMatrixRotationY(rotation);
 
     m_model->Render(m_direct3D->GetDeviceContext());
 
     if (!m_textureShader->Render(m_direct3D->GetDeviceContext(), m_model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
         m_model->GetTextureArray()))
-        return false;
-
-    m_direct3D->GetWorldMatrix(worldMatrix);
-    worldMatrix = XMMatrixTranslation(0.0f, -1.5f, 0.0f);
-    // worldMatrix = XMMatrixRotationY(90);
-
-    const XMMATRIX reflectionMatrix = m_camera->GetReflectionViewMatrix();
-
-    m_modelFloor->Render(m_direct3D->GetDeviceContext());
-
-    if (!m_reflectionShader->Render(m_direct3D->GetDeviceContext(), m_modelFloor->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-        m_modelFloor->GetTextureArray(), m_renderTexture->GetShaderResourceView(), reflectionMatrix))
         return false;
 
     m_direct3D->EndScene();
