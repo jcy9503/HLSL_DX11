@@ -179,21 +179,33 @@ bool SystemClass::Frame() const
     // }
 
     m_timer->Frame();
-    m_fps->Frame();
-    m_cpu->Frame();
+    // m_fps->Frame();
+    // m_cpu->Frame();
 
     m_position->SetFrameTime(m_timer->GetTime());
     
     bool keyDown = m_input->IsLeftArrowPressed();
     m_position->TurnLeft(keyDown);
+    // if(keyDown) printf("Left\n");
 
     keyDown = m_input->IsRightArrowPressed();
     m_position->TurnRight(keyDown);
-    
-    float rotationY = 0.0f;
-    m_position->GetRotation(rotationY);
+    // if(keyDown) printf("Right\n");
 
-    if (!m_graphics->Frame(mouseX, mouseY, m_fps->GetFps(), m_cpu->GetCpuPercentage(), m_timer->GetTime(), rotationY))
+    keyDown = m_input->IsUpArrowPressed();
+    m_position->TurnUp(keyDown);
+    // if(keyDown) printf("Up\n");
+
+    keyDown = m_input->IsDownArrowPressed();
+    m_position->TurnDown(keyDown);
+    // if(keyDown) printf("Down\n");
+
+    float rotationX = 0.0f;
+    float rotationY = 0.0f;
+    m_position->GetRotationX(rotationX);
+    m_position->GetRotationY(rotationY);
+    
+    if (!m_graphics->Frame(mouseX, mouseY, m_fps->GetFps(), m_cpu->GetCpuPercentage(), m_timer->GetTime(), rotationX, rotationY))
         return false;
 
     return m_graphics->Render();

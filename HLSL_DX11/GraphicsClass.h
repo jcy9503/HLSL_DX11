@@ -9,7 +9,8 @@ class D3DClass;
 class CameraClass;
 class ModelClass;
 class TextureShaderClass;
-class TransparentShaderClass;
+class RenderTextureClass;
+class ReflectionShaderClass;
 
 class GraphicsClass
 {
@@ -20,15 +21,20 @@ public:
 
 	bool Initialize(int, int, HWND);
 	void Shutdown();
-	bool Frame(int, int, int, int, float, float) const;
-	bool Render();
+	bool Frame(int, int, int, int, float, float, float) const;
+	bool Render() const;
 	// static bool InputKey(char);
+
+private:
+	bool RenderTexture() const;
+	bool RenderScene() const;
 
 private:
 	D3DClass* m_direct3D = nullptr;
 	CameraClass* m_camera = nullptr;
-	ModelClass* m_model1 = nullptr;
-	ModelClass* m_model2 = nullptr;
+	ModelClass* m_model = nullptr;
+	ModelClass* m_modelFloor = nullptr;
 	TextureShaderClass* m_textureShader = nullptr;
-	TransparentShaderClass* m_transparentShader = nullptr;
+	RenderTextureClass* m_renderTexture = nullptr;
+	ReflectionShaderClass* m_reflectionShader = nullptr;
 };
