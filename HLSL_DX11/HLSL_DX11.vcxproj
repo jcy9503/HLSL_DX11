@@ -398,6 +398,7 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="RefractionShaderClass.cpp" />
     <ClCompile Include="RenderTextureClass.cpp" />
     <ClCompile Include="SoundClass.cpp" />
     <ClCompile Include="SpecMapShaderClass.cpp" />
@@ -626,6 +627,7 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="WaterShaderClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AlignedAllocationPolicy.h" />
@@ -656,6 +658,7 @@
     <ClInclude Include="MultiTextureShaderClass.h" />
     <ClInclude Include="PositionClass.h" />
     <ClInclude Include="ReflectionShaderClass.h" />
+    <ClInclude Include="RefractionShaderClass.h" />
     <ClInclude Include="RenderTextureClass.h" />
     <ClInclude Include="SoundClass.h" />
     <ClInclude Include="SpecMapShaderClass.h" />
@@ -669,6 +672,7 @@
     <ClInclude Include="TimerClass.h" />
     <ClInclude Include="TranslateShaderClass.h" />
     <ClInclude Include="TransparentShaderClass.h" />
+    <ClInclude Include="WaterShaderClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

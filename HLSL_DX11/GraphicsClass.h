@@ -8,10 +8,11 @@ constexpr float SCREEN_NEAR = 0.1f;
 class D3DClass;
 class CameraClass;
 class ModelClass;
-class TextureShaderClass;
+class LightClass;
 class RenderTextureClass;
-class BitmapClass;
-class FadeShaderClass;
+class LightShaderClass;
+class RefractionShaderClass;
+class WaterShaderClass;
 
 class GraphicsClass
 {
@@ -27,20 +28,23 @@ public:
 	// static bool InputKey(char);
 
 private:
-	bool RenderToTexture(float);
-	bool RenderFadingScene();
-	bool RenderNormalScene(float);
+	bool RenderRefractionToTexture();
+	bool RenderReflactionToTexture();
+	bool RenderScene();
 
 private:
 	D3DClass* m_direct3D = nullptr;
 	CameraClass* m_camera = nullptr;
-	ModelClass* m_model = nullptr;
-	TextureShaderClass* m_textureShader = nullptr;
-	RenderTextureClass* m_renderTexture = nullptr;
-	BitmapClass* m_bitmap = nullptr;
-	FadeShaderClass* m_fadeShader = nullptr;
-	float m_fadeInTime = 0;
-	float m_accumulatedTime = 0;
-	float m_fadePercentage = 0;
-	bool m_fadeDone = false;
+	ModelClass* m_modelGround = nullptr;
+	ModelClass* m_modelWall = nullptr;
+	ModelClass* m_modelBath = nullptr;
+	ModelClass* m_modelWater = nullptr;
+	LightClass* m_light = nullptr;
+	RenderTextureClass* m_reflectionTexture = nullptr;
+	RenderTextureClass* m_refractionTexture = nullptr;
+	LightShaderClass* m_lightShader = nullptr;
+	RefractionShaderClass* m_refractionShader = nullptr;
+	WaterShaderClass* m_waterShader = nullptr;
+	float m_waterHeight = 0;
+	float m_waterTranslation = 0;
 };

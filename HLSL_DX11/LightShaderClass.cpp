@@ -11,26 +11,12 @@ LightShaderClass::LightShaderClass(const LightShaderClass&)
 LightShaderClass::~LightShaderClass()
 = default;
 
-bool LightShaderClass::Initialize(ID3D11Device* device, const HWND hwnd, const int lightVer)
+bool LightShaderClass::Initialize(ID3D11Device* device, const HWND hwnd)
 {
-    m_lightVersion = lightVer;
+    constexpr WCHAR vsFileDir[] = L"../HLSL_DX11/LightShader/vs_ambient.hlsl";
+    constexpr WCHAR psFileDir[] = L"../HLSL_DX11/LightShader/ps_ambient.hlsl";
 
-    constexpr WCHAR vsFileAmbient[] = L"../HLSL_DX11/Demo22/texture.vs";
-    constexpr WCHAR psFileAmbient[] = L"../HLSL_DX11/Demo22/texture.ps";
-    constexpr WCHAR vsFileDir[] = L"../HLSL_DX11/LightShader/DirLight.vs";
-    constexpr WCHAR psFileDir[] = L"../HLSL_DX11/LightShader/DirLight.ps";
-    
-    switch (m_lightVersion)
-    {
-    case 0:
-        return InitializeShader(device, hwnd, vsFileAmbient, psFileAmbient);
-    case 1:
-        return InitializeShader(device, hwnd, vsFileDir, psFileDir);
-    default:
-        break;
-    }
-
-    return false;
+    return InitializeShader(device, hwnd, vsFileDir, psFileDir);
 }
 
 void LightShaderClass::Shutdown()
@@ -40,12 +26,11 @@ void LightShaderClass::Shutdown()
 
 bool LightShaderClass::Render(ID3D11DeviceContext* deviceContext, const int indexCount, const XMMATRIX worldMatrix,
                               const XMMATRIX viewMatrix, const XMMATRIX projectionMatrix,
-                              ID3D11ShaderResourceView** texture, const XMFLOAT3 lightDirection,
-                              const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor, const XMFLOAT3 cameraPosition,
-                              const XMFLOAT4 specularColor, const float specularPower) const
+                              ID3D11ShaderResourceView** textureArray, const XMFLOAT3 lightDirection,
+                              const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor) const
 {
-    if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection,
-        ambientColor, diffuseColor, cameraPosition, specularColor, specularPower))
+    if (!SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, textureArray[0], lightDirection,
+        ambientColor, diffuseColor))
         return false;
 
     RenderShader(deviceContext, indexCount);
@@ -58,7 +43,7 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, c
     ID3D10Blob* errorMessage = nullptr;
 
     ID3D10Blob* vertexShaderBuffer = nullptr;
-    HRESULT result = D3DCompileFromFile(vsFilename, nullptr, nullptr, "TextureVertexShader", "vs_5_0",
+    HRESULT result = D3DCompileFromFile(vsFilename, nullptr, nullptr, "LightVertexShader", "vs_5_0",
         D3D10_SHADER_ENABLE_STRICTNESS, 0, &vertexShaderBuffer, &errorMessage);
     if (FAILED(result))
     {
@@ -75,7 +60,7 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, c
     }
 
     ID3D10Blob* pixelShaderBuffer = nullptr;
-    result = D3DCompileFromFile(psFilename, nullptr, nullptr, "TexturePixelShader", "ps_5_0",
+    result = D3DCompileFromFile(psFilename, nullptr, nullptr, "LightPixelShader", "ps_5_0",
         D3D10_SHADER_ENABLE_STRICTNESS, 0, &pixelShaderBuffer, &errorMessage);
     if (FAILED(result))
     {
@@ -167,17 +152,7 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, c
 
     D3D11_BUFFER_DESC lightBufferDesc;
     lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    switch(m_lightVersion)
-    {
-    case 0:
-        lightBufferDesc.ByteWidth = sizeof(AmbientLightBufferType);
-        break;
-    case 1:
-        lightBufferDesc.ByteWidth = sizeof(DirLightBufferType);
-        break;
-    default:
-        break;
-    }
+    lightBufferDesc.ByteWidth = sizeof(LightBufferType);
     lightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     lightBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     lightBufferDesc.MiscFlags = 0;
@@ -185,20 +160,6 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, const HWND hwnd, c
 
     result = device->CreateBuffer(&lightBufferDesc, nullptr, &m_lightBuffer);
     if (FAILED(result)) return false;
-
-    if (m_lightVersion == 0)
-    {
-        D3D11_BUFFER_DESC cameraBufferDesc;
-        cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
-        cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        cameraBufferDesc.MiscFlags = 0;
-        cameraBufferDesc.StructureByteStride = 0;
-
-        result = device->CreateBuffer(&cameraBufferDesc, nullptr, &m_cameraBuffer);
-        if (FAILED(result)) return false;
-    }
 
     return true;
 }
@@ -240,17 +201,11 @@ void LightShaderClass::ShutdownShader()
         m_pixelShader->Release();
         m_pixelShader = nullptr;
     }
-
-    if (m_cameraBuffer)
-    {
-        m_cameraBuffer->Release();
-        m_cameraBuffer = nullptr;
-    }
 }
 
 void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, const HWND hwnd, const WCHAR* shaderFilename)
 {
-    OutputDebugStringA(static_cast<const char*>(errorMessage->GetBufferPointer()));
+    printf("%s\n", static_cast<const char*>(errorMessage->GetBufferPointer()));
 
     errorMessage->Release();
     errorMessage = nullptr;
@@ -260,22 +215,18 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, const 
 
 bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix,
                                            XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
-                                           ID3D11ShaderResourceView** texture, const XMFLOAT3 lightDirection,
-                                           const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor,
-                                           const XMFLOAT3 cameraPosition, const XMFLOAT4 specularColor,
-                                           const float specularPower) const
+                                           ID3D11ShaderResourceView* texture, const XMFLOAT3 lightDirection,
+                                           const XMFLOAT4 ambientColor, const XMFLOAT4 diffuseColor) const
 {
-    deviceContext->PSSetShaderResources(0, 1, &texture[0]);
+    worldMatrix = XMMatrixTranspose(worldMatrix);
+    viewMatrix = XMMatrixTranspose(viewMatrix);
+    projectionMatrix = XMMatrixTranspose(projectionMatrix);
     
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     HRESULT result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(result)) return false;
 
     const auto dataPtr = static_cast<MatrixBufferType*>(mappedResource.pData);
-    
-    worldMatrix = XMMatrixTranspose(worldMatrix);
-    viewMatrix = XMMatrixTranspose(viewMatrix);
-    projectionMatrix = XMMatrixTranspose(projectionMatrix);
     
     dataPtr->world = worldMatrix;
     dataPtr->view = viewMatrix;
@@ -287,59 +238,23 @@ bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, X
 
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
-    if (m_lightVersion == 0)
-    {
-        result = deviceContext->Map(m_cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-        if (FAILED(result)) return false;
-
-        const auto dataPtr3 = static_cast<CameraBufferType*>(mappedResource.pData);
-        dataPtr3->cameraPosition = cameraPosition;
-        dataPtr3->padding = 0.0f;
-
-        deviceContext->Unmap(m_cameraBuffer, 0);
-
-        bufferNumber = 1;
-
-        deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_cameraBuffer);
-    }
+    deviceContext->PSSetShaderResources(0, 1, &texture);
 
     result = deviceContext->Map(m_lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-    if (FAILED(result)) return false;
-    
-    const auto ambientPtr = static_cast<AmbientLightBufferType*>(mappedResource.pData);
-    const auto dirPtr = static_cast<DirLightBufferType*>(mappedResource.pData);
+    if(FAILED(result)) return false;
 
-    if(m_lightVersion == 0)
-    {
-        const auto dataPtr2 = static_cast<AmbientLightBufferType*>(mappedResource.pData);
+    const auto dataPtr2 = static_cast<LightBufferType*>(mappedResource.pData);
 
-        dataPtr2->diffuseColor = diffuseColor;
-        dataPtr2->lightDirection = lightDirection;
-        dataPtr2->ambientColor = ambientColor;
-        dataPtr2->specularColor = specularColor;
-        dataPtr2->specularPower = specularPower;
+    dataPtr2->ambientColor = ambientColor;
+    dataPtr2->diffuseColor = diffuseColor;
+    dataPtr2->lightDirection = lightDirection;
+    dataPtr2->padding = 0.0f;
 
-        deviceContext->Unmap(m_lightBuffer, 0);
-    
-        bufferNumber = 0;
-    
-        deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
-    }
-    
-    if (m_lightVersion == 1)
-    {
-        const auto dataPtr2 = static_cast<DirLightBufferType*>(mappedResource.pData);
+    deviceContext->Unmap(m_lightBuffer, 0);
 
-        dataPtr2->diffuseColor = diffuseColor;
-        dataPtr2->lightDirection = lightDirection;
-        dataPtr2->padding = 0.0f;
+    bufferNumber = 0;
 
-        deviceContext->Unmap(m_lightBuffer, 0);
-
-        bufferNumber = 0;
-
-        deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
-    }
+    deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer);
     
     return true;
 }
